@@ -85,10 +85,8 @@ public class CGateInterfaceTest {
         catch (NullPointerException npe) {}
 
         CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT, CGateConfig.EVENT_PORT);
-        boolean result = CGateInterface.noop(session);
+        CGateInterface.noop(session);
         session.close();
-
-        assertTrue(result);
     }
 
 }

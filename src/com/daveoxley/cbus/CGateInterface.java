@@ -48,10 +48,9 @@ public final class CGateInterface
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.76</i></a>
      * @param cgate_session
-     * @return true if successful
      * @throws com.daveoxley.cbus.CGateException
      */
-    public static boolean noop(CGateSession cgate_session) throws CGateException
+    public static void noop(CGateSession cgate_session) throws CGateException
     {
         ArrayList<String> resp_array = cgate_session.sendCommand("noop");
         if (resp_array.isEmpty())
@@ -61,6 +60,5 @@ public final class CGateInterface
         String result_code = response.substring(0, 3).trim();
         if (!result_code.equals("200"))
             throw new CGateException(response);
-        return true;
     }
 }
