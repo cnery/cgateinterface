@@ -21,26 +21,32 @@ package com.daveoxley.cbus.events;
 
 import com.daveoxley.cbus.CGateSession;
 import java.util.GregorianCalendar;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public abstract class EventCallback
+public class DebugEventCallback extends EventCallback
 {
-    /**
-     *
-     * @param event_code
-     * @return
-     */
-    public abstract boolean acceptEvent(int event_code);
+    private final static Log log = LogFactory.getLog(DebugEventCallback.class);
 
-    /**
-     * 
-     * @param cgate_session
-     * @param event_time
-     * @param event_code
-     * @param event
-     */
-    public abstract void processEvent(CGateSession cgate_session, int event_code, GregorianCalendar event_time, String event);
+    public static boolean isDebugEnabled()
+    {
+        return log.isDebugEnabled();
+    }
+
+    @Override
+    public boolean acceptEvent(int event_code)
+    {
+        return true; // Accept all events
+    }
+
+    @Override
+    public void processEvent(CGateSession cgate_session, int event_code, GregorianCalendar event_time, String event)
+    {
+        log.debug("event_code: " + event_code + ", event_time: " + event_time.toString() + ", event: " + event);
+    }
+
 }

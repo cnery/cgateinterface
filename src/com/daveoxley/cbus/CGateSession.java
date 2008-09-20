@@ -19,6 +19,7 @@
 
 package com.daveoxley.cbus;
 
+import com.daveoxley.cbus.events.DebugEventCallback;
 import com.daveoxley.cbus.events.EventCallback;
 import com.daveoxley.cbus.threadpool.ThreadImpl;
 import com.daveoxley.cbus.threadpool.ThreadImplPool;
@@ -29,6 +30,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +72,8 @@ public class CGateSession
             event_socket = new Socket(cgate_server, event_port);
             event_input_stream = new BufferedReader(new InputStreamReader(event_socket.getInputStream()));
             connected = true;
+            if (DebugEventCallback.isDebugEnabled())
+                registerEventCallback(new DebugEventCallback());
             String response = response_input_stream.readLine();
             log.debug(response);
         }
@@ -240,9 +244,9 @@ public class CGateSession
                 try
                 {
                     final String event = CGateSession.this.event_input_stream.readLine();
-                    if(event.length() > 19)
+                    if(event.length() >= 19)
                     {
-                        int event_code = Integer.parseInt(event.substring(16, 19).trim());
+                        final int event_code = Integer.parseInt(event.substring(16, 19).trim());
                         for (final EventCallback event_callback : event_callbacks)
                         {
                             try
@@ -253,7 +257,16 @@ public class CGateSession
                                     callback_thread.execute(new Runnable() {
                                         public void run()
                                         {
-                                            event_callback.processEvent(CGateSession.this, event);
+                                            GregorianCalendar event_time = new GregorianCalendar(
+                                                    Integer.parseInt(event.substring(0, 4)),
+                                                    Integer.parseInt(event.substring(4, 6)),
+                                                    Integer.parseInt(event.substring(6, 8)),
+                                                    Integer.parseInt(event.substring(9, 11)),
+                                                    Integer.parseInt(event.substring(11, 13)),
+                                                    Integer.parseInt(event.substring(13, 15)));
+
+                                            event_callback.processEvent(CGateSession.this, event_code,
+                                                    event_time, event.length() == 19 ? null : event.substring(19));
                                         }
                                     });
                                 }

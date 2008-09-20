@@ -19,7 +19,6 @@
 
 package com.daveoxley.cbus;
 
-import com.daveoxley.cbus.Project.ProjectState;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,49 +28,19 @@ import java.util.HashMap;
  */
 public final class Project
 {
-    /**
-     * 
-     */
-    public enum ProjectState {
-
-        /**
-         * Project not yet loaded.
-         */
-        not_loaded,
-        /**
-         * Project is starting.
-         */
-        starting,
-        /**
-         * Project is stopping.
-         */
-        stopping,
-        /**
-         * Project is started.
-         */
-        started,
-        /**
-         * Project is stopped.
-         */
-        stopped
-    };
-
     private String project_name;
-
-    private ProjectState state;
 
     private final HashMap<Integer,Network> cached_networks = new HashMap<Integer,Network>();
 
     private Project(String cgate_response)
     {
-        state = ProjectState.not_loaded;
-        updateFromResponse(cgate_response);
+        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
+        this.project_name = resp_map.get("project");
     }
 
     /**
      * Issue a <code>project dir</code> and <code>project list</code> to the
-     * C-Gate server. The <code>project list</code> is run to update the state
-     * of the projects that are loaded already.
+     * C-Gate server.
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.89 and 4.3.90</i></a>
@@ -86,9 +55,6 @@ public final class Project
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp_array)
             projects.add(getOrCreateProject(cgate_session, response));
-
-        // Do a list so that the status of the projects are up to date
-        list(cgate_session);
 
         return projects;
     }
@@ -159,19 +125,7 @@ public final class Project
             project = new Project(cgate_response);
             cgate_session.cacheProject(project);
         }
-        project.updateFromResponse(cgate_response);
         return project;
-    }
-
-    private void updateFromResponse(String cgate_response)
-    {
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        String _project_name = resp_map.get("project");
-        if (_project_name != null)
-            project_name = _project_name;
-        String _state = resp_map.get("state");
-        if (_state != null)
-            state = ProjectState.valueOf(_state);
     }
 
     /**
@@ -182,16 +136,6 @@ public final class Project
     public String getName()
     {
         return project_name;
-    }
-
-    /**
-     * Get the project state.
-     *
-     * @return The ProjectState
-     */
-    public ProjectState getState()
-    {
-        return state;
     }
 
     Network getCachedNetwork(int net_id)
@@ -223,8 +167,6 @@ public final class Project
         String result_code = response.substring(0, 3).trim();
         if (!result_code.equals("200"))
             throw new CGateException(response);
-
-        state = ProjectState.not_loaded;
     }
 
     /**
@@ -246,9 +188,6 @@ public final class Project
         String result_code = response.substring(0, 3).trim();
         if (!result_code.equals("200"))
             throw new CGateException(response);
-
-        if (state == ProjectState.not_loaded)
-            state = ProjectState.stopped;
     }
 
     /**
@@ -270,9 +209,5 @@ public final class Project
         String result_code = response.substring(0, 3).trim();
         if (!result_code.equals("200"))
             throw new CGateException(response);
-
-        // TODO: Probably better to call list in a loop until state==STARTED
-        //       than assuming that state is STARTED immediately after a start.
-        state = ProjectState.started;
     }
 }

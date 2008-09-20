@@ -34,10 +34,10 @@ public final class Network
 
     private final HashMap<Integer,Unit> cached_units = new HashMap<Integer,Unit>();
 
-    private Network(Project project, String cgate_response)
+    private Network(Project project, String cgate_response) throws CGateException
     {
         this.project = project;
-        updateFromResponse(cgate_response);
+        this.net_id = getNetworkID(project, cgate_response);
     }
 
     /**
@@ -82,6 +82,20 @@ public final class Network
         Project.dir(cgate_session);
         Project project = Project.getProject(cgate_session, resp_map.get("project"));
 
+        int net_id = getNetworkID(project, cgate_response);
+
+        Network network = project.getCachedNetwork(net_id);
+        if (network == null)
+        {
+            network = new Network(project, cgate_response);
+            project.cacheNetwork(network);
+        }
+        return network;
+    }
+
+    static int getNetworkID(Project project, String cgate_response) throws CGateException
+    {
+        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
         int net_id = -1;
         String value = resp_map.get("network");
         if (value != null)
@@ -99,35 +113,7 @@ public final class Network
         if (net_id < 0)
             throw new CGateException();
 
-        Network network = project.getCachedNetwork(net_id);
-        if (network == null)
-        {
-            network = new Network(project, cgate_response);
-            project.cacheNetwork(network);
-        }
-        network.updateFromResponse(cgate_response);
-        return network;
-    }
-
-    private void updateFromResponse(String cgate_response)
-    {
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        int _net_id = -1;
-        String value = resp_map.get("network");
-        if (value != null)
-            _net_id = Integer.parseInt(value.trim());
-        else
-        {
-            value = resp_map.get("address");
-            if (value != null)
-            {
-                String net_str = value.substring(project.getName().length() + 3);
-                _net_id = Integer.parseInt(net_str.trim());
-            }
-        }
-
-        if (_net_id > -1)
-            net_id = _net_id;
+        return net_id;
     }
 
     /**

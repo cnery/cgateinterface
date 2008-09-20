@@ -19,9 +19,6 @@
 
 package com.daveoxley.cbus;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
@@ -35,7 +32,7 @@ public class Unit
     Unit(Network network, String cgate_response)
     {
         this.network = network;
-        updateFromResponse(cgate_response);
+        this.unit_id = getUnitID(network, cgate_response);
     }
 
     static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response)
@@ -52,7 +49,6 @@ public class Unit
                 unit = new Group(network, response);
             network.cacheUnit(unit);
         }
-        unit.updateFromResponse(response);
         return unit;
     }
 
@@ -71,18 +67,6 @@ public class Unit
         int index = response.indexOf(application_address);
         int unit_index = response.indexOf(" ", index + 1);
         return Integer.parseInt(response.substring(index + application_address.length(), unit_index).trim());
-    }
-
-    private void updateFromResponse(String cgate_response)
-    {
-        unit_id = getUnitID(network, cgate_response);
-
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        for (Map.Entry<String,String> entry : resp_map.entrySet())
-        {
-            String key = entry.getKey();
-            String value = entry.getValue();
-        }
     }
 
     /**
