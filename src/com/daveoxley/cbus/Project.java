@@ -22,7 +22,6 @@ package com.daveoxley.cbus;
 import com.daveoxley.cbus.Project.ProjectState;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -38,23 +37,23 @@ public final class Project
         /**
          * Project not yet loaded.
          */
-        NOT_LOADED,
+        not_loaded,
         /**
          * Project is starting.
          */
-        STARTING,
+        starting,
         /**
          * Project is stopping.
          */
-        STOPPING,
+        stopping,
         /**
          * Project is started.
          */
-        STARTED,
+        started,
         /**
          * Project is stopped.
          */
-        STOPPED
+        stopped
     };
 
     private String project_name;
@@ -65,7 +64,7 @@ public final class Project
 
     private Project(String cgate_response)
     {
-        state = ProjectState.NOT_LOADED;
+        state = ProjectState.not_loaded;
         updateFromResponse(cgate_response);
     }
 
@@ -149,16 +148,7 @@ public final class Project
         String project_name = null;
 
         HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        for (Map.Entry<String,String> entry : resp_map.entrySet())
-        {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.equals("project"))
-            {
-                project_name = value;
-                break;
-            }
-        }
+        project_name = resp_map.get("project");
 
         if (project_name == null)
             throw new CGateException();
@@ -176,24 +166,12 @@ public final class Project
     private void updateFromResponse(String cgate_response)
     {
         HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        for (Map.Entry<String,String> entry : resp_map.entrySet())
-        {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.equals("project"))
-                project_name = value;
-            else if (key.equals("state"))
-            {
-                if (value.equals("starting"))
-                    state = ProjectState.STARTING;
-                else if (value.equals("stopping"))
-                    state = ProjectState.STOPPING;
-                else if (value.equals("started"))
-                    state = ProjectState.STARTED;
-                else if (value.equals("stopped"))
-                    state = ProjectState.STOPPED;
-            }
-        }
+        String _project_name = resp_map.get("project");
+        if (_project_name != null)
+            project_name = _project_name;
+        String _state = resp_map.get("state");
+        if (_state != null)
+            state = ProjectState.valueOf(_state);
     }
 
     /**
@@ -246,7 +224,7 @@ public final class Project
         if (!result_code.equals("200"))
             throw new CGateException(response);
 
-        state = ProjectState.NOT_LOADED;
+        state = ProjectState.not_loaded;
     }
 
     /**
@@ -269,8 +247,8 @@ public final class Project
         if (!result_code.equals("200"))
             throw new CGateException(response);
 
-        if (state == ProjectState.NOT_LOADED)
-            state = ProjectState.STOPPED;
+        if (state == ProjectState.not_loaded)
+            state = ProjectState.stopped;
     }
 
     /**
@@ -295,6 +273,6 @@ public final class Project
 
         // TODO: Probably better to call list in a loop until state==STARTED
         //       than assuming that state is STARTED immediately after a start.
-        state = ProjectState.STARTED;
+        state = ProjectState.started;
     }
 }

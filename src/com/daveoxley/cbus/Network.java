@@ -21,7 +21,6 @@ package com.daveoxley.cbus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -78,21 +77,19 @@ public final class Network
 
     private static Network getOrCreateNetwork(CGateSession cgate_session, String cgate_response) throws CGateException
     {
-        Project project = Project.getOrCreateProject(cgate_session, cgate_response);
+        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
+
+        Project.dir(cgate_session);
+        Project project = Project.getProject(cgate_session, resp_map.get("project"));
 
         int net_id = -1;
-
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        for (Map.Entry<String,String> entry : resp_map.entrySet())
+        String value = resp_map.get("network");
+        if (value != null)
+            net_id = Integer.parseInt(value.trim());
+        else
         {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.equals("network"))
-            {
-                net_id = Integer.parseInt(value.trim());
-                break;
-            }
-            else if (key.equals("address"))
+            value = resp_map.get("address");
+            if (value != null)
             {
                 String net_str = value.substring(project.getName().length() + 3);
                 net_id = Integer.parseInt(net_str.trim());
@@ -115,18 +112,22 @@ public final class Network
     private void updateFromResponse(String cgate_response)
     {
         HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
-        for (Map.Entry<String,String> entry : resp_map.entrySet())
+        int _net_id = -1;
+        String value = resp_map.get("network");
+        if (value != null)
+            _net_id = Integer.parseInt(value.trim());
+        else
         {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.equals("network"))
-                net_id = Integer.parseInt(value.trim());
-            else if (key.equals("address"))
+            value = resp_map.get("address");
+            if (value != null)
             {
                 String net_str = value.substring(project.getName().length() + 3);
-                net_id = Integer.parseInt(net_str.trim());
+                _net_id = Integer.parseInt(net_str.trim());
             }
         }
+
+        if (_net_id > -1)
+            net_id = _net_id;
     }
 
     /**
