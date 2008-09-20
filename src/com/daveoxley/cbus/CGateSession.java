@@ -28,8 +28,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -98,7 +96,7 @@ public class CGateSession
             event_controller.stop();
             cached_projects.clear();
         }
-        catch(IOException e) {}
+        catch(Exception e) {}
 
         try
         {
@@ -235,14 +233,14 @@ public class CGateSession
                             }
                             catch (Exception e)
                             {
-                                log.fatal(e);
+                                new CGateException(e);
                             }
                         }
                     }
                 }
                 catch (IOException e)
                 {
-                    log.fatal(e);
+                    new CGateException(e);
                 }
             }
         }

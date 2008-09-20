@@ -19,25 +19,57 @@
 
 package com.daveoxley.cbus;
 
-import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class CGateException extends IOException
+public class CGateException extends Exception
 {
+    private final static Log log = LogFactory.getLog(CGateException.class);
+
+    private final static String new_line = System.getProperty("line.separator");
+
     CGateException()
     {
+        this(null, null);
     }
 
-    CGateException(IOException e)
+    CGateException(Exception e)
     {
-        super(e);
+        this(null, e);
     }
 
     CGateException(String response)
     {
-        super(response);
+        this(response, null);
+    }
+
+    CGateException(String response, Exception e)
+    {
+        super(response, e);
+
+        String message = getLocalizedMessage();
+
+        Throwable traced_exception = e;
+        while (traced_exception instanceof InvocationTargetException)
+        {
+            InvocationTargetException ite = (InvocationTargetException) traced_exception;
+            traced_exception = ite.getTargetException();
+        }
+        if (traced_exception instanceof CGateException)
+            return;
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pr = new PrintWriter(sw);
+        printStackTrace(pr);
+        message += new_line + new_line + sw.toString();
+
+        log.fatal(message);
     }
 }

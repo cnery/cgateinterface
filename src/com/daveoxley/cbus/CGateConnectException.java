@@ -19,15 +19,13 @@
 
 package com.daveoxley.cbus;
 
-import java.io.IOException;
-
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
 public class CGateConnectException extends CGateException
 {
-    CGateConnectException(IOException e)
+    CGateConnectException(Exception e)
     {
         super(e);
     }
