@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="0" hostname="edmund" name="com.daveoxley.cbus.CGateInterfaceTest" tests="2" time="0.126" timestamp="2008-09-19T04:45:29">
+  <properties>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
+    <property name="sun.boot.library.path" value="/opt/sun-jdk-1.6.0.07/jre/lib/amd64" />
+    <property name="java.vm.version" value="10.0-b23" />
+    <property name="java.vm.vendor" value="Sun Microsystems Inc." />
+    <property name="java.vendor.url" value="http://java.sun.com/" />
+    <property name="path.separator" value=":" />
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM" />
+    <property name="file.encoding.pkg" value="sun.io" />
+    <property name="user.country" value="US" />
+    <property name="sun.java.launcher" value="SUN_STANDARD" />
+    <property name="sun.os.patch.level" value="unknown" />
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
+    <property name="user.dir" value="/home/dave/development/CGateInterface" />
+    <property name="java.runtime.version" value="1.6.0_07-b06" />
+    <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment" />
+    <property name="java.endorsed.dirs" value="/opt/sun-jdk-1.6.0.07/jre/lib/endorsed" />
+    <property name="os.arch" value="amd64" />
+    <property name="java.io.tmpdir" value="/tmp" />
+    <property name="line.separator" value="
+" />
+    <property name="java.vm.specification.vendor" value="Sun Microsystems Inc." />
+    <property name="os.name" value="Linux" />
+    <property name="sun.jnu.encoding" value="ANSI_X3.4-1968" />
+    <property name="java.library.path" value="/opt/sun-jdk-1.6.0.07/jre/lib/amd64/server:/opt/sun-jdk-1.6.0.07/jre/lib/amd64:/opt/sun-jdk-1.6.0.07/jre/../lib/amd64:/usr/java/packages/lib/amd64:/lib:/usr/lib" />
+    <property name="java.specification.name" value="Java Platform API Specification" />
+    <property name="java.class.version" value="50.0" />
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Server Compiler" />
+    <property name="os.version" value="2.6.26-gentoo-r1" />
+    <property name="user.home" value="/home/dave" />
+    <property name="user.timezone" value="" />
+    <property name="java.awt.printerjob" value="sun.print.PSPrinterJob" />
+    <property name="file.encoding" value="ANSI_X3.4-1968" />
+    <property name="java.specification.version" value="1.6" />
+    <property name="user.name" value="dave" />
+    <property name="java.class.path" value="/usr/share/netbeans-6.5/java2/ant/patches/72080.jar:/usr/share/netbeans-6.5/java2/ant/lib/ant.jar:/usr/share/netbeans-6.5/java2/ant/lib/ant-junit.jar:/home/dave/development/CGateInterface/build/classes:/home/dave/development/CGateInterface/src:/usr/share/netbeans-6.5/platform9/modules/ext/junit-4.1.jar:/home/dave/development/CGateInterface/build/test/classes:/home/dave/development/CGateInterface/test" />
+    <property name="java.vm.specification.version" value="1.0" />
+    <property name="sun.arch.data.model" value="64" />
+    <property name="java.home" value="/opt/sun-jdk-1.6.0.07/jre" />
+    <property name="java.specification.vendor" value="Sun Microsystems Inc." />
+    <property name="user.language" value="en" />
+    <property name="java.vm.info" value="mixed mode" />
+    <property name="java.version" value="1.6.0_07" />
+    <property name="java.ext.dirs" value="/opt/sun-jdk-1.6.0.07/jre/lib/ext:/usr/java/packages/lib/ext" />
+    <property name="sun.boot.class.path" value="/opt/sun-jdk-1.6.0.07/jre/lib/resources.jar:/opt/sun-jdk-1.6.0.07/jre/lib/rt.jar:/opt/sun-jdk-1.6.0.07/jre/lib/sunrsasign.jar:/opt/sun-jdk-1.6.0.07/jre/lib/jsse.jar:/opt/sun-jdk-1.6.0.07/jre/lib/jce.jar:/opt/sun-jdk-1.6.0.07/jre/lib/charsets.jar:/opt/sun-jdk-1.6.0.07/jre/classes" />
+    <property name="java.vendor" value="Sun Microsystems Inc." />
+    <property name="file.separator" value="/" />
+    <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi" />
+    <property name="sun.cpu.endian" value="little" />
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
+    <property name="sun.cpu.isalist" value="" />
+  </properties>
+  <testcase classname="com.daveoxley.cbus.CGateInterfaceTest" name="testConnect" time="0.04" />
+  <testcase classname="com.daveoxley.cbus.CGateInterfaceTest" name="testNoop" time="0.0060" />
+  <system-out><![CDATA[connect
+201 Service ready: Clipsal C-Gate Version: v2.6.1 (build 2246) #cmd-syntax=1.0
+noop
+201 Service ready: Clipsal C-Gate Version: v2.6.1 (build 2246) #cmd-syntax=1.0
+response: 200 OK.
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
