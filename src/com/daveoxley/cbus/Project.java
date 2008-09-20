@@ -85,7 +85,7 @@ public final class Project
 
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp_array)
-            projects.add(getProject(cgate_session, response));
+            projects.add(getOrCreateProject(cgate_session, response));
 
         // Do a list so that the status of the projects are up to date
         list(cgate_session);
@@ -107,12 +107,40 @@ public final class Project
 
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp_array)
-            projects.add(getProject(cgate_session, response));
+            projects.add(getOrCreateProject(cgate_session, response));
 
         return projects;
     }
 
-    static Project getProject(CGateSession cgate_session, String cgate_response) throws CGateException
+    /**
+     * Retrieve the Project Object for the specified project name.
+     * 
+     * @param cgate_session The CGateSession
+     * @param project_name The project name to retrieve
+     * @return The Project
+     */
+    public static Project getProject(CGateSession cgate_session, String project_name) throws CGateException
+    {
+        dir(cgate_session);
+
+        return cgate_session.getCachedProject(project_name);
+    }
+
+    /**
+     * Retrieve the Network Object for the specified network id.
+     * 
+     * @param cgate_session The CGateSession
+     * @param network_id The network to retrieve
+     * @return The Network
+     */
+    public Network getNetwork(CGateSession cgate_session, int network_id) throws CGateException
+    {
+        Network.listAll(cgate_session);
+
+        return getCachedNetwork(network_id);
+    }
+
+    static Project getOrCreateProject(CGateSession cgate_session, String cgate_response) throws CGateException
     {
         String project_name = null;
 

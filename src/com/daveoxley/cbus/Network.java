@@ -33,6 +33,8 @@ public final class Network
 
     private int net_id;
 
+    private final HashMap<Integer,Unit> cached_units = new HashMap<Integer,Unit>();
+
     private Network(Project project, String cgate_response)
     {
         this.project = project;
@@ -53,14 +55,28 @@ public final class Network
 
         ArrayList<Network> networks = new ArrayList<Network>();
         for (String response : resp_array)
-            networks.add(getNetwork(cgate_session, response));
+            networks.add(getOrCreateNetwork(cgate_session, response));
 
         return networks;
     }
 
-    private static Network getNetwork(CGateSession cgate_session, String cgate_response) throws CGateException
+    /**
+     * Retrieve the Unit Object for the specified unit id.
+     * 
+     * @param cgate_session The CGateSession
+     * @param unit_id The unit to retrieve
+     * @return The Unit
+     */
+    public Unit getUnit(CGateSession cgate_session, int unit_id) throws CGateException
     {
-        Project project = Project.getProject(cgate_session, cgate_response);
+        tree(cgate_session);
+
+        return getCachedUnit(unit_id);
+    }
+
+    private static Network getOrCreateNetwork(CGateSession cgate_session, String cgate_response) throws CGateException
+    {
+        Project project = Project.getOrCreateProject(cgate_session, cgate_response);
 
         int net_id = -1;
 
@@ -114,5 +130,42 @@ public final class Network
     public int getNetworkID()
     {
         return net_id;
+    }
+
+    String getProjectName()
+    {
+        return project.getName();
+    }
+
+    Unit getCachedUnit(int unit_id)
+    {
+        return cached_units.get(unit_id);
+    }
+
+    void cacheUnit(Unit unit)
+    {
+        cached_units.put(unit.getUnitID(), unit);
+    }
+
+    /**
+     * Issue a <code>tree //PROJECT/NET_ID</code> to the C-Gate server.
+     * 
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.124</i></a>
+     * @param cgate_session The C-Gate session
+     * @return ArrayList of Units
+     */
+    public ArrayList<Unit> tree(CGateSession cgate_session) throws CGateException
+    {
+        ArrayList<String> resp_array = cgate_session.sendCommand("tree //" + project.getName() + "/" + net_id);
+
+        ArrayList<Unit> untis = new ArrayList<Unit>();
+        for (String response : resp_array)
+        {
+            if (response.indexOf("//" + project.getName() + "/" + net_id + "/") > -1)
+                untis.add(Unit.getOrCreateUnit(cgate_session, this, response));
+        }
+
+        return untis;
     }
 }

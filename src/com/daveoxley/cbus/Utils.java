@@ -34,7 +34,8 @@ class Utils
         for (String resp : resp_array)
         {
             int index = resp.indexOf("=");
-            map.put(resp.substring(0, index), resp.substring(index + 1));
+            if (index > -1)
+                map.put(resp.substring(0, index), resp.substring(index + 1));
         }
         return map;
     }
