@@ -48,6 +48,7 @@ public final class Network
      *      <i>C-Gate Server Guide 4.3.63</i></a>
      * @param cgate_session The C-Gate session
      * @return ArrayList of Networks
+     * @throws CGateException
      */
     public static ArrayList<Network> listAll(CGateSession cgate_session) throws CGateException
     {
@@ -66,6 +67,7 @@ public final class Network
      * @param cgate_session The CGateSession
      * @param unit_id The unit to retrieve
      * @return The Unit
+     * @throws CGateException
      */
     public Unit getUnit(CGateSession cgate_session, int unit_id) throws CGateException
     {
@@ -127,6 +129,10 @@ public final class Network
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public int getNetworkID()
     {
         return net_id;
@@ -154,6 +160,7 @@ public final class Network
      *      <i>C-Gate Server Guide 4.3.124</i></a>
      * @param cgate_session The C-Gate session
      * @return ArrayList of Units
+     * @throws CGateException
      */
     public ArrayList<Unit> tree(CGateSession cgate_session) throws CGateException
     {

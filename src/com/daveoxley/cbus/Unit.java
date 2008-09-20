@@ -85,11 +85,19 @@ public class Unit
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public int getUnitID()
     {
         return unit_id;
     }
 
+    /**
+     *
+     * @return
+     */
     protected Network getNetwork()
     {
         return network;

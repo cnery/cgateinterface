@@ -78,6 +78,7 @@ public final class Project
      *      <i>C-Gate Server Guide 4.3.89 and 4.3.90</i></a>
      * @param cgate_session The C-Gate session
      * @return ArrayList of Projects
+     * @throws CGateException
      */
     public static ArrayList<Project> dir(CGateSession cgate_session) throws CGateException
     {
@@ -100,6 +101,7 @@ public final class Project
      *      <i>C-Gate Server Guide 4.3.90</i></a>
      * @param cgate_session The C-Gate session
      * @return ArrayList of Projects
+     * @throws CGateException
      */
     public static ArrayList<Project> list(CGateSession cgate_session) throws CGateException
     {
@@ -118,6 +120,7 @@ public final class Project
      * @param cgate_session The CGateSession
      * @param project_name The project name to retrieve
      * @return The Project
+     * @throws CGateException
      */
     public static Project getProject(CGateSession cgate_session, String project_name) throws CGateException
     {
@@ -132,6 +135,7 @@ public final class Project
      * @param cgate_session The CGateSession
      * @param network_id The network to retrieve
      * @return The Network
+     * @throws CGateException
      */
     public Network getNetwork(CGateSession cgate_session, int network_id) throws CGateException
     {
@@ -228,6 +232,7 @@ public final class Project
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.86</i></a>
      * @param cgate_session The C-Gate session
+     * @throws CGateException
      */
     public void close(CGateSession cgate_session) throws CGateException
     {
@@ -250,6 +255,7 @@ public final class Project
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.91</i></a>
      * @param cgate_session The C-Gate session
+     * @throws CGateException
      */
     public void load(CGateSession cgate_session) throws CGateException
     {
@@ -273,6 +279,7 @@ public final class Project
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.96</i></a>
      * @param cgate_session The C-Gate session
+     * @throws CGateException
      */
     public void start(CGateSession cgate_session) throws CGateException
     {

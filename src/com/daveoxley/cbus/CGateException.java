@@ -35,22 +35,38 @@ public class CGateException extends Exception
 
     private final static String new_line = System.getProperty("line.separator");
 
-    CGateException()
+    /**
+     *
+     */
+    public CGateException()
     {
         this(null, null);
     }
 
-    CGateException(Exception e)
+    /**
+     *
+     * @param e
+     */
+    public CGateException(Exception e)
     {
         this(null, e);
     }
 
-    CGateException(String response)
+    /**
+     *
+     * @param response
+     */
+    public CGateException(String response)
     {
         this(response, null);
     }
 
-    CGateException(String response, Exception e)
+    /**
+     *
+     * @param response
+     * @param e
+     */
+    public CGateException(String response, Exception e)
     {
         super(response, e);
 

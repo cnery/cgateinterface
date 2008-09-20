@@ -38,6 +38,7 @@ public class Group extends Unit
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.79</i></a>
      * @param cgate_session The C-Gate session
+     * @throws CGateException
      */
     public void on(CGateSession cgate_session) throws CGateException
     {
@@ -59,6 +60,7 @@ public class Group extends Unit
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.77</i></a>
      * @param cgate_session The C-Gate session
+     * @throws CGateException
      */
     public void off(CGateSession cgate_session) throws CGateException
     {
@@ -80,6 +82,9 @@ public class Group extends Unit
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.100</i></a>
      * @param cgate_session The C-Gate session
+     * @param level
+     * @param seconds
+     * @throws CGateException
      */
     public void ramp(CGateSession cgate_session, int level, int seconds) throws CGateException
     {

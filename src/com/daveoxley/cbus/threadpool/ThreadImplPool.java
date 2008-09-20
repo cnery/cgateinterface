@@ -17,27 +17,36 @@
  *
  */
 
-package com.daveoxley.cbus.events;
+package com.daveoxley.cbus.threadpool;
 
-import com.daveoxley.cbus.CGateSession;
+import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public abstract class EventCallback
+public class ThreadImplPool extends GenericObjectPool
 {
     /**
      *
-     * @param event_code
-     * @return
+     * @param config
      */
-    public abstract boolean acceptEvent(int event_code);
+    public ThreadImplPool(Config config)
+    {
+        super(new ThreadImplFactory(), config);
+    }
 
     /**
-     * 
-     * @param cgate_session
-     * @param event
+     *
+     * @return
+     * @throws java.lang.Exception
      */
-    public abstract void processEvent(CGateSession cgate_session, String event);
+    @Override
+    public Object borrowObject() throws Exception
+    {
+        ThreadImpl thread = (ThreadImpl)super.borrowObject();
+        thread.setPool(this);
+        return thread;
+    }
 }

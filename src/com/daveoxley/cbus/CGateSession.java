@@ -20,6 +20,8 @@
 package com.daveoxley.cbus;
 
 import com.daveoxley.cbus.events.EventCallback;
+import com.daveoxley.cbus.threadpool.ThreadImpl;
+import com.daveoxley.cbus.threadpool.ThreadImplPool;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 /**
  *
@@ -180,6 +184,10 @@ public class CGateSession
         return cached_projects.get(project_name);
     }
 
+    /**
+     *
+     * @param event_callback
+     */
     public void registerEventCallback(EventCallback event_callback)
     {
         event_callbacks.add(event_callback);
@@ -190,8 +198,19 @@ public class CGateSession
     {
         private Thread thread = null;
 
+        private final ThreadImplPool event_callback_pool;
+
         private EventController()
         {
+            Config config = new Config();
+            config.maxActive = 10;
+            config.minIdle   = 2;
+            config.maxIdle   = 5;
+            config.testOnBorrow = false;
+            config.testOnReturn = true;
+            config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
+            config.maxWait = -1;
+            event_callback_pool = new ThreadImplPool(config);
         }
 
         private synchronized void start()
@@ -220,16 +239,24 @@ public class CGateSession
             {
                 try
                 {
-                    String event = CGateSession.this.event_input_stream.readLine();
+                    final String event = CGateSession.this.event_input_stream.readLine();
                     if(event.length() > 19)
                     {
                         int event_code = Integer.parseInt(event.substring(16, 19).trim());
-                        for (EventCallback event_callback : event_callbacks)
+                        for (final EventCallback event_callback : event_callbacks)
                         {
                             try
                             {
                                 if (event_callback.acceptEvent(event_code))
-                                    event_callback.processEvent(CGateSession.this, event);
+                                {
+                                    ThreadImpl callback_thread = (ThreadImpl)event_callback_pool.borrowObject();
+                                    callback_thread.execute(new Runnable() {
+                                        public void run()
+                                        {
+                                            event_callback.processEvent(CGateSession.this, event);
+                                        }
+                                    });
+                                }
                             }
                             catch (Exception e)
                             {
