@@ -29,6 +29,16 @@ import java.util.ArrayList;
 public final class CGateInterface
 {
     /**
+     * Retrieve the CGateInterface library version.
+     *
+     * @return The CGateInterface version
+     */
+    public String getVersion()
+    {
+        return "0.1-dev";
+    }
+
+    /**
      * Connect to a C-Gate server using the supplied cgate_server and cgate_port.
      *
      * @param cgate_server The <code>InetAddress</code> of the C-Gate server

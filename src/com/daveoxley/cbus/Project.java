@@ -43,7 +43,7 @@ public final class Project
      * C-Gate server.
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
-     *      <i>C-Gate Server Guide 4.3.89 and 4.3.90</i></a>
+     *      <i>C-Gate Server Guide 4.3.89</i></a>
      * @param cgate_session The C-Gate session
      * @return ArrayList of Projects
      * @throws CGateException
