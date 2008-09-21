@@ -19,14 +19,26 @@
 
 package com.daveoxley.cbus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-class Utils
+public class CGateObject
 {
+    static void handle200Response(ArrayList<String> resp_array) throws CGateException
+    {
+        if (resp_array.isEmpty())
+            throw new CGateException();
+
+        String response = resp_array.get(0);
+        String result_code = response.substring(0, 3).trim();
+        if (!result_code.equals("200"))
+            throw new CGateException(response);
+    }
+
     static HashMap<String,String> responseToMap(String cgate_response)
     {
         HashMap<String,String> map = new HashMap<String,String>();

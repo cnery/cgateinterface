@@ -19,8 +19,6 @@
 
 package com.daveoxley.cbus;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
@@ -43,15 +41,7 @@ public class Group extends Unit
     public void on(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getUnitID();
-        ArrayList<String> resp_array = cgate_session.sendCommand("on " + address);
-
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        handle200Response(cgate_session.sendCommand("on " + address));
     }
 
     /**
@@ -65,15 +55,7 @@ public class Group extends Unit
     public void off(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getUnitID();
-        ArrayList<String> resp_array = cgate_session.sendCommand("off " + address);
-
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        handle200Response(cgate_session.sendCommand("off " + address));
     }
 
     /**
@@ -89,14 +71,6 @@ public class Group extends Unit
     public void ramp(CGateSession cgate_session, int level, int seconds) throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getUnitID();
-        ArrayList<String> resp_array = cgate_session.sendCommand("ramp " + address + " " + level + " " + seconds + "s");
-
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        handle200Response(cgate_session.sendCommand("ramp " + address + " " + level + " " + seconds + "s"));
     }
 }

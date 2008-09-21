@@ -26,7 +26,7 @@ import java.util.HashMap;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public final class Network
+public final class Network extends CGateObject
 {
     private Project project;
 
@@ -77,7 +77,7 @@ public final class Network
 
     private static Network getOrCreateNetwork(CGateSession cgate_session, String cgate_response) throws CGateException
     {
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
+        HashMap<String,String> resp_map = responseToMap(cgate_response);
 
         Project.dir(cgate_session);
         Project project = Project.getProject(cgate_session, resp_map.get("project"));
@@ -95,7 +95,7 @@ public final class Network
 
     static int getNetworkID(Project project, String cgate_response) throws CGateException
     {
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
+        HashMap<String,String> resp_map = responseToMap(cgate_response);
         int net_id = -1;
         String value = resp_map.get("network");
         if (value != null)

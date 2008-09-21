@@ -23,7 +23,7 @@ package com.daveoxley.cbus;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class Unit
+public class Unit extends CGateObject
 {
     private Network network;
 

@@ -20,13 +20,12 @@
 package com.daveoxley.cbus;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public final class CGateInterface
+public final class CGateInterface extends CGateObject
 {
     /**
      * Retrieve the CGateInterface library version.
@@ -62,13 +61,6 @@ public final class CGateInterface
      */
     public static void noop(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("noop");
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        handle200Response(cgate_session.sendCommand("noop"));
     }
 }

@@ -26,15 +26,19 @@ import java.util.HashMap;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public final class Project
+public final class Project extends CGateObject
 {
     private String project_name;
 
     private final HashMap<Integer,Network> cached_networks = new HashMap<Integer,Network>();
 
+    private Project()
+    {
+    }
+
     private Project(String cgate_response)
     {
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
+        HashMap<String,String> resp_map = responseToMap(cgate_response);
         this.project_name = resp_map.get("project");
     }
 
@@ -113,7 +117,7 @@ public final class Project
     {
         String project_name = null;
 
-        HashMap<String,String> resp_map = Utils.responseToMap(cgate_response);
+        HashMap<String,String> resp_map = responseToMap(cgate_response);
         project_name = resp_map.get("project");
 
         if (project_name == null)
@@ -158,15 +162,42 @@ public final class Project
      */
     public void close(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project close " + project_name);
+        handle200Response(cgate_session.sendCommand("project close " + project_name));
+    }
 
-        if (resp_array.isEmpty())
-            throw new CGateException();
+    /**
+     * Issue a <code>project copy <i>source project_name</i> <i>copy project_name</i></code> to the C-Gate server.
+     * 
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.87</i></a>
+     * @param cgate_session The C-Gate session
+     * @param project_name The project name of the new copy
+     * @return Project The new copy of the current Project
+     * @throws CGateException
+     */
+    public Project copy(CGateSession cgate_session, String target_project_name) throws CGateException
+    {
+        handle200Response(cgate_session.sendCommand("project copy " + project_name + " " + target_project_name));
 
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        Project new_project = new Project();
+        new_project.project_name = target_project_name;
+        cgate_session.cacheProject(new_project);
+        return new_project;
+    }
+
+    /**
+     * Issue a <code>project delete <i>project_name</i></code> to the C-Gate server.
+     * 
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.88</i></a>
+     * @param cgate_session The C-Gate session
+     * @throws CGateException
+     */
+    public void delete(CGateSession cgate_session) throws CGateException
+    {
+        handle200Response(cgate_session.sendCommand("project delete " + project_name));
+
+        cgate_session.uncacheProject(this);
     }
 
     /**
@@ -179,15 +210,7 @@ public final class Project
      */
     public void load(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project load " + project_name);
-
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        handle200Response(cgate_session.sendCommand("project load " + project_name));
     }
 
     /**
@@ -200,14 +223,6 @@ public final class Project
      */
     public void start(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project start " + project_name);
-
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(0);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
+        handle200Response(cgate_session.sendCommand("project start " + project_name));
     }
 }

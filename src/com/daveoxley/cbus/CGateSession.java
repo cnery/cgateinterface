@@ -41,7 +41,7 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class CGateSession
+public class CGateSession extends CGateObject
 {
     private final static Log log = LogFactory.getLog(CGateSession.class);
 
@@ -181,6 +181,11 @@ public class CGateSession
     void cacheProject(Project project)
     {
         cached_projects.put(project.getName(), project);
+    }
+
+    void uncacheProject(Project project)
+    {
+        cached_projects.remove(project.getName());
     }
 
     Project getCachedProject(String project_name)
