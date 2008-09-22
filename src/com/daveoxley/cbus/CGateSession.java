@@ -57,14 +57,13 @@ public class CGateSession extends CGateObject
 
     private boolean connected = false;
 
-    private final HashMap<String,Project> cached_projects = new HashMap<String,Project>();
-
     private final EventController event_controller = new EventController();
 
     private final ArrayList<EventCallback> event_callbacks = new ArrayList<EventCallback>();
 
     CGateSession(InetAddress cgate_server, int command_port, int event_port) throws CGateConnectException
     {
+        setupSubtreeCache("project");
         try {
             command_socket = new Socket(cgate_server, command_port);
             response_input_stream = new BufferedReader(new InputStreamReader(command_socket.getInputStream()));
@@ -88,6 +87,12 @@ public class CGateSession extends CGateObject
         }
     }
 
+    @Override
+    protected String getKey()
+    {
+        return null;
+    }
+    
     /**
      * Issue a <code>quit</code> to the C-Gate server and close the input and output stream
      * and the command_socket.
@@ -102,7 +107,7 @@ public class CGateSession extends CGateObject
         {
             sendCommand("quit");
             event_controller.stop();
-            cached_projects.clear();
+            clearCache();
         }
         catch(Exception e) {}
 
@@ -176,21 +181,6 @@ public class CGateSession extends CGateObject
     {
         if (!connected)
             throw new CGateNotConnectedException();
-    }
-
-    void cacheProject(Project project)
-    {
-        cached_projects.put(project.getName(), project);
-    }
-
-    void uncacheProject(Project project)
-    {
-        cached_projects.remove(project.getName());
-    }
-
-    Project getCachedProject(String project_name)
-    {
-        return cached_projects.get(project_name);
     }
 
     /**

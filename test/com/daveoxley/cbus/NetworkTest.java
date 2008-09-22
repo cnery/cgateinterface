@@ -79,4 +79,14 @@ public class NetworkTest {
         assertEquals(254, result.get(0).getNetworkID());
     }
 
+    /**
+     * Test of getNetworkID method, of class Network.
+     */
+    @Test
+    public void testListApplications() throws CGateException {
+        System.out.println("listApplications");
+
+        Network network = Project.getProject(session, "OXLEY").getNetwork(session, 254);
+        network.listApplications(session);
+    }
 }

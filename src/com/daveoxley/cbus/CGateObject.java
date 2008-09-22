@@ -26,7 +26,7 @@ import java.util.HashMap;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class CGateObject
+public abstract class CGateObject
 {
     static void handle200Response(ArrayList<String> resp_array) throws CGateException
     {
@@ -50,5 +50,35 @@ public class CGateObject
                 map.put(resp.substring(0, index), resp.substring(index + 1));
         }
         return map;
+    }
+
+    protected abstract String getKey();
+
+    private final HashMap<String,HashMap<String,CGateObject>> subtree_cache = new HashMap<String,HashMap<String,CGateObject>>();
+
+    protected void setupSubtreeCache(String cache_key)
+    {
+        subtree_cache.put(cache_key, new HashMap<String,CGateObject>());
+    }
+
+    protected CGateObject cacheObject(String cache_key, CGateObject cgate_obj)
+    {
+        return subtree_cache.get(cache_key).put(cgate_obj.getKey(), cgate_obj);
+    }
+
+    protected CGateObject uncacheObject(String cache_key, CGateObject cgate_obj)
+    {
+        return subtree_cache.get(cache_key).remove(cgate_obj);
+    }
+
+    protected CGateObject getCachedObject(String cache_key, String key)
+    {
+        return subtree_cache.get(cache_key).get(key);
+    }
+
+    protected void clearCache()
+    {
+        for (HashMap<String,CGateObject> map: subtree_cache.values())
+            map.clear();
     }
 }

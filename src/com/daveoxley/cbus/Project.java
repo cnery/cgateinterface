@@ -30,16 +30,22 @@ public final class Project extends CGateObject
 {
     private String project_name;
 
-    private final HashMap<Integer,Network> cached_networks = new HashMap<Integer,Network>();
-
     private Project()
     {
+        setupSubtreeCache("network");
     }
 
     private Project(String cgate_response)
     {
+        this();
         HashMap<String,String> resp_map = responseToMap(cgate_response);
         this.project_name = resp_map.get("project");
+    }
+
+    @Override
+    protected String getKey()
+    {
+        return project_name;
     }
 
     /**
@@ -95,7 +101,7 @@ public final class Project extends CGateObject
     {
         dir(cgate_session);
 
-        return cgate_session.getCachedProject(project_name);
+        return (Project)cgate_session.getCachedObject("project", project_name);
     }
 
     /**
@@ -110,7 +116,7 @@ public final class Project extends CGateObject
     {
         Network.listAll(cgate_session);
 
-        return getCachedNetwork(network_id);
+        return (Network)getCachedObject("network", String.valueOf(network_id));
     }
 
     static Project getOrCreateProject(CGateSession cgate_session, String cgate_response) throws CGateException
@@ -123,11 +129,11 @@ public final class Project extends CGateObject
         if (project_name == null)
             throw new CGateException();
 
-        Project project = cgate_session.getCachedProject(project_name);
+        Project project = (Project)cgate_session.getCachedObject("project", project_name);
         if (project == null)
         {
             project = new Project(cgate_response);
-            cgate_session.cacheProject(project);
+            cgate_session.cacheObject("project", project);
         }
         return project;
     }
@@ -140,16 +146,6 @@ public final class Project extends CGateObject
     public String getName()
     {
         return project_name;
-    }
-
-    Network getCachedNetwork(int net_id)
-    {
-        return cached_networks.get(net_id);
-    }
-
-    void cacheNetwork(Network network)
-    {
-        cached_networks.put(network.getNetworkID(), network);
     }
 
     /**
@@ -181,7 +177,7 @@ public final class Project extends CGateObject
 
         Project new_project = new Project();
         new_project.project_name = target_project_name;
-        cgate_session.cacheProject(new_project);
+        cgate_session.cacheObject("project", new_project);
         return new_project;
     }
 
@@ -197,7 +193,7 @@ public final class Project extends CGateObject
     {
         handle200Response(cgate_session.sendCommand("project delete " + project_name));
 
-        cgate_session.uncacheProject(this);
+        cgate_session.uncacheObject("project", this);
     }
 
     /**

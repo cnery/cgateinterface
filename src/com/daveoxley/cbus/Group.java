@@ -25,9 +25,12 @@ package com.daveoxley.cbus;
  */
 public class Group extends Unit
 {
-    Group(Network network, String cgate_response)
+    private Application application;
+
+    Group(Application application, String cgate_response)
     {
-        super(network, cgate_response);
+        super(application.getNetwork(), cgate_response);
+        this.application = application;
     }
 
     /**

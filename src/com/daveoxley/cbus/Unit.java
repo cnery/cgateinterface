@@ -35,21 +35,40 @@ public class Unit extends CGateObject
         this.unit_id = getUnitID(network, cgate_response);
     }
 
-    static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response)
+    @Override
+    protected String getKey()
+    {
+        return String.valueOf(unit_id);
+    }
+
+    static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response) throws CGateException
     {
         String application_type = getApplicationType(network, response);
         int unit_id = getUnitID(network, response);
 
-        Unit unit = network.getCachedUnit(unit_id);
-        if (unit == null)
+        Unit return_unit;
+        if (application_type.equals("p"))
         {
-            if (application_type.equals("p"))
+            Unit unit = (Unit)network.getCachedObject("unit", String.valueOf(unit_id));
+            if (unit == null)
+            {
                 unit = new Unit(network, response);
-            else
-                unit = new Group(network, response);
-            network.cacheUnit(unit);
+                network.cacheObject("unit", unit);
+            }
+            return_unit = unit;
         }
-        return unit;
+        else
+        {
+            Group group = (Group)network.getCachedObject("group", String.valueOf(unit_id));
+            if (group == null)
+            {
+                Application application = network.getApplication(cgate_session, Integer.parseInt(application_type));
+                group = new Group(application, response);
+                application.cacheObject("group", group);
+            }
+            return_unit = group;
+        }
+        return return_unit;
     }
 
     static String getApplicationType(Network network, String response)

@@ -37,6 +37,12 @@ public final class CGateInterface extends CGateObject
         return "0.1-dev";
     }
 
+    @Override
+    protected String getKey()
+    {
+        return "";
+    }
+
     /**
      * Connect to a C-Gate server using the supplied cgate_server and cgate_port.
      *
