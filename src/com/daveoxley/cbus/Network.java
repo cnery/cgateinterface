@@ -151,6 +151,18 @@ public final class Network extends CGateObject
         return project.getName();
     }
 
+    public String getType(CGateSession cgate_session) throws CGateException
+    {
+        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " Type");
+        return responseToMap(resp_array.get(0)).get("Type");
+    }
+
+    public String getInterfaceAddress(CGateSession cgate_session) throws CGateException
+    {
+        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " InterfaceAddress");
+        return responseToMap(resp_array.get(0)).get("InterfaceAddress");
+    }
+
     /**
      * Issue a <code>tree //PROJECT/NET_ID</code> to the C-Gate server.
      * 

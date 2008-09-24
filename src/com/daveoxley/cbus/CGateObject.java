@@ -20,6 +20,7 @@
 package com.daveoxley.cbus;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -74,6 +75,11 @@ public abstract class CGateObject
     protected CGateObject getCachedObject(String cache_key, String key)
     {
         return subtree_cache.get(cache_key).get(key);
+    }
+
+    protected Collection<CGateObject> getAllCachedObjects(String cache_key)
+    {
+        return subtree_cache.get(cache_key).values();
     }
 
     protected void clearCache()

@@ -119,6 +119,24 @@ public final class Project extends CGateObject
         return (Network)getCachedObject("network", String.valueOf(network_id));
     }
 
+    /**
+     * Get all Network objects for this Project.
+     * 
+     * @param cgate_session The CGateSession
+     * @return ArrayList of Networks
+     * @throws CGateException
+     */
+    public ArrayList<Network> getNetworks(CGateSession cgate_session) throws CGateException
+    {
+        Network.listAll(cgate_session);
+
+        ArrayList<Network> networks = new ArrayList<Network>();
+        for (CGateObject network : getAllCachedObjects("network"))
+            networks.add((Network)network);
+
+        return networks;
+    }
+
     static Project getOrCreateProject(CGateSession cgate_session, String cgate_response) throws CGateException
     {
         String project_name = null;

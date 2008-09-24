@@ -177,6 +177,11 @@ public class CGateSession extends CGateObject
         return array_response;
     }
 
+    public boolean isConnected()
+    {
+        return connected;
+    }
+
     private void checkConnected() throws CGateNotConnectedException
     {
         if (!connected)
