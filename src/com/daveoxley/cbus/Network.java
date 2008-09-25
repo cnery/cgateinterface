@@ -184,7 +184,7 @@ public final class Network extends CGateObject
         return response.substring(index + network_address.length(), application_index);
     }
 
-    private void getUnits(CGateSession cgate_session) throws CGateException
+    public ArrayList<Unit> getUnits(CGateSession cgate_session) throws CGateException
     {
         tree(cgate_session);
 
@@ -201,10 +201,15 @@ public final class Network extends CGateObject
             }
         }
 
+        ArrayList<Unit> units = new ArrayList<Unit>();
         for (int i = 1; i <= number_of_units; i++) {
             resp_array = dbget(cgate_session, "Unit[" + i + "]/Address");
-            Unit.getOrCreateUnit(cgate_session, this, resp_array.get(0), false);
+            Unit unit = Unit.getOrCreateUnit(cgate_session, this, resp_array.get(0), false);
+            if (unit != null)
+                units.add(unit);
         }
+
+        return units;
     }
 
     /**
