@@ -42,15 +42,37 @@ public abstract class CGateObject
 
     static HashMap<String,String> responseToMap(String cgate_response)
     {
+        return responseToMap(cgate_response, false);
+    }
+
+    static HashMap<String,String> responseToMap(String cgate_response, boolean db_response)
+    {
+        cgate_response = cgate_response.substring(4);
+
         HashMap<String,String> map = new HashMap<String,String>();
-        String resp_array[] = cgate_response.substring(4).split(" ");
-        for (String resp : resp_array)
+
+        if (db_response)
+            addResponseToMap(cgate_response, map);
+        else
         {
-            int index = resp.indexOf("=");
-            if (index > -1)
-                map.put(resp.substring(0, index), resp.substring(index + 1));
+            String resp_array[] = cgate_response.split(" ");
+            for (String resp : resp_array)
+                addResponseToMap(resp, map);
         }
+
         return map;
+    }
+
+    private static void addResponseToMap(String resp, HashMap<String,String> map)
+    {
+        int index = resp.indexOf("=");
+        if (index > -1)
+        {
+            String value = resp.substring(index + 1);
+            if (value.equals("null"))
+                value = "";
+            map.put(resp.substring(0, index), value);
+        }
     }
 
     protected abstract String getKey();

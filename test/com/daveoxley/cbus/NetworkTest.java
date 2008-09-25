@@ -87,6 +87,6 @@ public class NetworkTest {
         System.out.println("listApplications");
 
         Network network = Project.getProject(session, "OXLEY").getNetwork(session, 254);
-        network.listApplications(session);
+        network.getApplications(session);
     }
 }

@@ -68,8 +68,8 @@ public class UnitTest {
         Project project = Project.getProject(session, "OXLEY");
         Network network = project.getNetwork(session, 254);
 
-        assertEquals("p", Unit.getApplicationType(network, example_tree_resp1));
-        assertEquals("56", Unit.getApplicationType(network, example_tree_resp2));
+        assertEquals("p", Network.getApplicationType(network, example_tree_resp1));
+        assertEquals("56", Network.getApplicationType(network, example_tree_resp2));
     }
 
     /**

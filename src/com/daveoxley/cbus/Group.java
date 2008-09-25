@@ -19,18 +19,105 @@
 
 package com.daveoxley.cbus;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class Group extends Unit
+public class Group extends CGateObject
 {
     private Application application;
 
-    Group(Application application, String cgate_response)
+    private int group_id;
+
+    Group(Application application, String cgate_response, boolean tree_resp)
     {
-        super(application.getNetwork(), cgate_response);
         this.application = application;
+        if (tree_resp)
+            this.group_id = getGroupID(application.getNetwork(), cgate_response);
+        else
+        {
+            int index = cgate_response.indexOf("=");
+            this.group_id = Integer.parseInt(cgate_response.substring(index + 1));
+        }
+    }
+
+    @Override
+    protected String getKey()
+    {
+        return String.valueOf(group_id);
+    }
+
+    static Group getOrCreateGroup(CGateSession cgate_session, Network network, String response) throws CGateException
+    {
+        String application_type = Network.getApplicationType(network, response);
+        int group_id = getGroupID(network, response);
+
+        if (!application_type.equals("p"))
+        {
+            Application application = network.getApplication(cgate_session, Integer.parseInt(application_type));
+            Group group = (Group)application.getCachedObject("group", String.valueOf(group_id));
+            if (group == null)
+            {
+                group = new Group(application, response, true);
+                application.cacheObject("group", group);
+            }
+            return group;
+        }
+        return null;
+    }
+
+    static Group getOrCreateGroup(CGateSession cgate_session, Application application, String response) throws CGateException
+    {
+        int index = response.indexOf("=");
+        String group_id = response.substring(index + 1);
+
+        if (group_id.equals("255"))
+            return null;
+
+        Group group = (Group)application.getCachedObject("group", group_id);
+        if (group == null)
+        {
+            group = new Group(application, response, false);
+            application.cacheObject("group", group);
+        }
+        return group;
+    }
+
+    static int getGroupID(Network network, String response)
+    {
+        String application_type = Network.getApplicationType(network, response);
+        String application_address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + application_type + "/";
+        int index = response.indexOf(application_address);
+        int unit_index = response.indexOf(" ", index + 1);
+        return Integer.parseInt(response.substring(index + application_address.length(), unit_index).trim());
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getGroupID()
+    {
+        return group_id;
+    }
+
+    /**
+     *
+     * @return
+     */
+    private Network getNetwork()
+    {
+        return application.getNetwork();
+    }
+
+    public String getName(CGateSession cgate_session) throws CGateException
+    {
+        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" +
+                String.valueOf(application.getApplicationID()) + "/" + group_id + "/TagName";
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        return responseToMap(resp_array.get(0), true).get(address);
     }
 
     /**
@@ -43,7 +130,8 @@ public class Group extends Unit
      */
     public void on(CGateSession cgate_session) throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getUnitID();
+        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
+                "/" + application.getApplicationID() + "/" + getGroupID();
         handle200Response(cgate_session.sendCommand("on " + address));
     }
 
@@ -57,7 +145,8 @@ public class Group extends Unit
      */
     public void off(CGateSession cgate_session) throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getUnitID();
+        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
+                "/" + application.getApplicationID() + "/" + getGroupID();
         handle200Response(cgate_session.sendCommand("off " + address));
     }
 
@@ -73,7 +162,8 @@ public class Group extends Unit
      */
     public void ramp(CGateSession cgate_session, int level, int seconds) throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getUnitID();
+        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
+                "/" + application.getApplicationID() + "/" + getGroupID();
         handle200Response(cgate_session.sendCommand("ramp " + address + " " + level + " " + seconds + "s"));
     }
 }

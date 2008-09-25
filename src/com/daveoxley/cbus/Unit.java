@@ -29,10 +29,16 @@ public class Unit extends CGateObject
 
     private int unit_id;
 
-    Unit(Network network, String cgate_response)
+    Unit(Network network, String cgate_response, boolean tree_resp)
     {
         this.network = network;
-        this.unit_id = getUnitID(network, cgate_response);
+        if (tree_resp)
+            this.unit_id = getUnitID(network, cgate_response);
+        else
+        {
+            int index = cgate_response.indexOf("=");
+            this.unit_id = Integer.parseInt(cgate_response.substring(index + 1));
+        }
     }
 
     @Override
@@ -41,47 +47,43 @@ public class Unit extends CGateObject
         return String.valueOf(unit_id);
     }
 
-    static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response) throws CGateException
+    static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response, boolean tree_resp) throws CGateException
     {
-        String application_type = getApplicationType(network, response);
-        int unit_id = getUnitID(network, response);
-
-        Unit return_unit;
-        if (application_type.equals("p"))
+        if (tree_resp)
         {
-            Unit unit = (Unit)network.getCachedObject("unit", String.valueOf(unit_id));
-            if (unit == null)
+            String application_type = Network.getApplicationType(network, response);
+            int unit_id = getUnitID(network, response);
+
+            if (application_type.equals("p"))
             {
-                unit = new Unit(network, response);
-                network.cacheObject("unit", unit);
+                Unit unit = (Unit)network.getCachedObject("unit", String.valueOf(unit_id));
+                if (unit == null)
+                {
+                    unit = new Unit(network, response, true);
+                    network.cacheObject("unit", unit);
+                }
+                return unit;
             }
-            return_unit = unit;
+            return null;
         }
         else
         {
-            Group group = (Group)network.getCachedObject("group", String.valueOf(unit_id));
-            if (group == null)
-            {
-                Application application = network.getApplication(cgate_session, Integer.parseInt(application_type));
-                group = new Group(application, response);
-                application.cacheObject("group", group);
-            }
-            return_unit = group;
-        }
-        return return_unit;
-    }
+            int index = response.indexOf("=");
+            String unit_id = response.substring(index + 1);
 
-    static String getApplicationType(Network network, String response)
-    {
-        String network_address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/";
-        int index = response.indexOf(network_address);
-        int application_index = response.indexOf("/", index + network_address.length());
-        return response.substring(index + network_address.length(), application_index);
+            Unit unit = (Unit)network.getCachedObject("unit", unit_id);
+            if (unit == null)
+            {
+                unit = new Unit(network, response, false);
+                network.cacheObject("unit", unit);
+            }
+            return unit;
+        }
     }
 
     static int getUnitID(Network network, String response)
     {
-        String application_type = getApplicationType(network, response);
+        String application_type = Network.getApplicationType(network, response);
         String application_address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + application_type + "/";
         int index = response.indexOf(application_address);
         int unit_index = response.indexOf(" ", index + 1);
@@ -101,7 +103,7 @@ public class Unit extends CGateObject
      *
      * @return
      */
-    protected Network getNetwork()
+    private Network getNetwork()
     {
         return network;
     }

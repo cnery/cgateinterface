@@ -76,7 +76,7 @@ public final class Network extends CGateObject
      */
     public Application getApplication(CGateSession cgate_session, int application_id) throws CGateException
     {
-        listApplications(cgate_session);
+        getApplications(cgate_session);
 
         return (Application)getCachedObject("application", String.valueOf(application_id));
     }
@@ -91,7 +91,7 @@ public final class Network extends CGateObject
      */
     public Unit getUnit(CGateSession cgate_session, int unit_id) throws CGateException
     {
-        tree(cgate_session);
+        getUnits(cgate_session);
 
         return (Unit)getCachedObject("unit", String.valueOf(unit_id));
     }
@@ -151,6 +151,13 @@ public final class Network extends CGateObject
         return project.getName();
     }
 
+    public String getName(CGateSession cgate_session) throws CGateException
+    {
+        String address = "//" + project.getName() + "/" + net_id + "/TagName";
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        return responseToMap(resp_array.get(0), true).get(address);
+    }
+
     public String getType(CGateSession cgate_session) throws CGateException
     {
         ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " Type");
@@ -163,6 +170,43 @@ public final class Network extends CGateObject
         return responseToMap(resp_array.get(0)).get("InterfaceAddress");
     }
 
+    public String getState(CGateSession cgate_session) throws CGateException
+    {
+        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " State");
+        return responseToMap(resp_array.get(0)).get("State");
+    }
+
+    static String getApplicationType(Network network, String response)
+    {
+        String network_address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/";
+        int index = response.indexOf(network_address);
+        int application_index = response.indexOf("/", index + network_address.length());
+        return response.substring(index + network_address.length(), application_index);
+    }
+
+    private void getUnits(CGateSession cgate_session) throws CGateException
+    {
+        tree(cgate_session);
+
+        ArrayList<String> resp_array = dbget(cgate_session, null);
+
+        int number_of_units = -1;
+        for (String response : resp_array) {
+            String address = "//" + project.getName() + "/" + net_id + "/Unit[";
+            int index = response.indexOf(address);
+            if (index > -1) {
+                int index2 = response.indexOf("]", index + address.length());
+                number_of_units = Integer.parseInt(response.substring(index + address.length(), index2));
+                break;
+            }
+        }
+
+        for (int i = 1; i <= number_of_units; i++) {
+            resp_array = dbget(cgate_session, "Unit[" + i + "]/Address");
+            Unit.getOrCreateUnit(cgate_session, this, resp_array.get(0), false);
+        }
+    }
+
     /**
      * Issue a <code>tree //PROJECT/NET_ID</code> to the C-Gate server.
      * 
@@ -172,19 +216,21 @@ public final class Network extends CGateObject
      * @return ArrayList of Units
      * @throws CGateException
      */
-    public ArrayList<Unit> tree(CGateSession cgate_session) throws CGateException
+    void tree(CGateSession cgate_session) throws CGateException
     {
-        listApplications(cgate_session);
+        getApplications(cgate_session);
         ArrayList<String> resp_array = cgate_session.sendCommand("tree //" + project.getName() + "/" + net_id);
 
-        ArrayList<Unit> units = new ArrayList<Unit>();
         for (String response : resp_array)
         {
             if (response.indexOf("//" + project.getName() + "/" + net_id + "/") > -1)
-                units.add(Unit.getOrCreateUnit(cgate_session, this, response));
+            {
+                if (getApplicationType(this, response).equals("p"))
+                    Unit.getOrCreateUnit(cgate_session, this, response, true);
+                else
+                    Group.getOrCreateGroup(cgate_session, this, response);
+            }
         }
-
-        return units;
     }
 
     ArrayList<String> dbget(CGateSession cgate_session, String param_name) throws CGateException
@@ -192,14 +238,21 @@ public final class Network extends CGateObject
         return cgate_session.sendCommand("dbget //" + project.getName() + "/" + net_id + (param_name == null ? "" : ("/" + param_name)));
     }
 
-    ArrayList<Application> listApplications(CGateSession cgate_session) throws CGateException
+    /**
+     * Get all Application objects for this Network.
+     * 
+     * @param cgate_session The CGateSession
+     * @return ArrayList of Applications
+     * @throws CGateException
+     */
+    public ArrayList<Application> getApplications(CGateSession cgate_session) throws CGateException
     {
         ArrayList<String> resp_array = dbget(cgate_session, null);
 
         int number_of_applications = -1;
         for (String response : resp_array)
         {
-            String address = "//" + project.getName() + "/" + net_id + "/" + "Application[";
+            String address = "//" + project.getName() + "/" + net_id + "/Application[";
             int index = response.indexOf(address);
             if (index > -1)
             {
@@ -213,7 +266,9 @@ public final class Network extends CGateObject
         for (int i = 1; i <= number_of_applications; i++)
         {
             resp_array = dbget(cgate_session, "Application[" + i + "]/Address");
-            applications.add(Application.getOrCreateApplication(cgate_session, this, resp_array.get(0)));
+            Application application = Application.getOrCreateApplication(cgate_session, this, resp_array.get(0));
+            if (application != null)
+                applications.add(application);
         }
 
         return applications;
