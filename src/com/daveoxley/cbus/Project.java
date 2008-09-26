@@ -90,6 +90,26 @@ public final class Project extends CGateObject
     }
 
     /**
+     * Issue a <code>project new <i>project_name</i></code> to the C-Gate server.
+     * 
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.92</i></a>
+     * @param cgate_session The C-Gate session
+     * @param project_name The project name of the new copy
+     * @return Project The new Project
+     * @throws CGateException
+     */
+    public static Project newProject(CGateSession cgate_session, String project_name) throws CGateException
+    {
+        handle200Response(cgate_session.sendCommand("project new " + project_name));
+
+        Project new_project = new Project();
+        new_project.project_name = project_name;
+        cgate_session.cacheObject("project", new_project);
+        return new_project;
+    }
+
+    /**
      * Retrieve the Project Object for the specified project name.
      * 
      * @param cgate_session The CGateSession
