@@ -31,9 +31,12 @@ public class Group extends CGateObject
 
     private int group_id;
 
+    private boolean on_network;
+
     Group(Application application, String cgate_response, boolean tree_resp)
     {
         this.application = application;
+        this.on_network = tree_resp;
         if (tree_resp)
             this.group_id = getGroupID(application.getNetwork(), cgate_response);
         else

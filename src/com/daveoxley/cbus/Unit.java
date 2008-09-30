@@ -31,9 +31,12 @@ public class Unit extends CGateObject
 
     private int unit_id;
 
+    private boolean on_network;
+
     Unit(Network network, String cgate_response, boolean tree_resp)
     {
         this.network = network;
+        this.on_network = tree_resp;
         if (tree_resp)
             this.unit_id = getUnitID(network, cgate_response);
         else
@@ -108,6 +111,11 @@ public class Unit extends CGateObject
     private Network getNetwork()
     {
         return network;
+    }
+
+    public boolean onNetwork()
+    {
+        return on_network;
     }
 
     public String getName(CGateSession cgate_session) throws CGateException
