@@ -214,11 +214,10 @@ public final class Network extends CGateObject
 
     /**
      * Issue a <code>tree //PROJECT/NET_ID</code> to the C-Gate server.
-     * 
+     *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.124</i></a>
      * @param cgate_session The C-Gate session
-     * @return ArrayList of Units
      * @throws CGateException
      */
     void tree(CGateSession cgate_session) throws CGateException
@@ -236,6 +235,19 @@ public final class Network extends CGateObject
                     Group.getOrCreateGroup(cgate_session, this, response);
             }
         }
+    }
+
+    /**
+     * Issue a <code>net open //PROJECT/NET_ID</code> to the C-Gate server.
+     *
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.65</i></a>
+     * @param cgate_session The C-Gate session
+     * @throws CGateException
+     */
+    public void open(CGateSession cgate_session) throws CGateException
+    {
+        handle200Response(cgate_session.sendCommand("net open //" + project.getName() + "/" + net_id));
     }
 
     ArrayList<String> dbget(CGateSession cgate_session, String param_name) throws CGateException

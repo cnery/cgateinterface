@@ -34,7 +34,7 @@ public abstract class CGateObject
         if (resp_array.isEmpty())
             throw new CGateException();
 
-        String response = resp_array.get(0);
+        String response = resp_array.get(resp_array.size() - 1);
         String result_code = response.substring(0, 3).trim();
         if (!result_code.equals("200"))
             throw new CGateException(response);
