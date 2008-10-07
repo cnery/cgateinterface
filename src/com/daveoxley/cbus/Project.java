@@ -249,7 +249,7 @@ public final class Project extends CGateObject
 
     /**
      * Issue a <code>project start <i>project_name</i></code> to the C-Gate server.
-     * 
+     *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.96</i></a>
      * @param cgate_session The C-Gate session
@@ -258,5 +258,18 @@ public final class Project extends CGateObject
     public void start(CGateSession cgate_session) throws CGateException
     {
         handle200Response(cgate_session.sendCommand("project start " + project_name));
+    }
+
+    /**
+     * Issue a <code>project save <i>project_name</i></code> to the C-Gate server.
+     *
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.95</i></a>
+     * @param cgate_session The C-Gate session
+     * @throws CGateException
+     */
+    public void save(CGateSession cgate_session) throws CGateException
+    {
+        handle200Response(cgate_session.sendCommand("project save " + project_name));
     }
 }
