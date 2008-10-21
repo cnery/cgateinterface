@@ -29,17 +29,6 @@ import java.util.HashMap;
  */
 public abstract class CGateObject
 {
-    static void handle200Response(ArrayList<String> resp_array) throws CGateException
-    {
-        if (resp_array.isEmpty())
-            throw new CGateException();
-
-        String response = resp_array.get(resp_array.size() - 1);
-        String result_code = response.substring(0, 3).trim();
-        if (!result_code.equals("200"))
-            throw new CGateException(response);
-    }
-
     static HashMap<String,String> responseToMap(String cgate_response)
     {
         return responseToMap(cgate_response, false);

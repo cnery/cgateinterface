@@ -57,7 +57,7 @@ public final class Network extends CGateObject
      */
     public static ArrayList<Network> listAll(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("net list_all");
+        ArrayList<String> resp_array = cgate_session.sendCommand("net list_all").toArray();
 
         ArrayList<Network> networks = new ArrayList<Network>();
         for (String response : resp_array)
@@ -154,25 +154,25 @@ public final class Network extends CGateObject
     public String getName(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + project.getName() + "/" + net_id + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getType(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " Type");
+        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " Type").toArray();
         return responseToMap(resp_array.get(0)).get("Type");
     }
 
     public String getInterfaceAddress(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " InterfaceAddress");
+        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " InterfaceAddress").toArray();
         return responseToMap(resp_array.get(0)).get("InterfaceAddress");
     }
 
     public String getState(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " State");
+        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " State").toArray();
         return responseToMap(resp_array.get(0)).get("State");
     }
 
@@ -223,7 +223,7 @@ public final class Network extends CGateObject
     void tree(CGateSession cgate_session) throws CGateException
     {
         getApplications(cgate_session);
-        ArrayList<String> resp_array = cgate_session.sendCommand("tree //" + project.getName() + "/" + net_id);
+        ArrayList<String> resp_array = cgate_session.sendCommand("tree //" + project.getName() + "/" + net_id).toArray();
 
         for (String response : resp_array)
         {
@@ -247,12 +247,12 @@ public final class Network extends CGateObject
      */
     public void open(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("net open //" + project.getName() + "/" + net_id));
+        cgate_session.sendCommand("net open //" + project.getName() + "/" + net_id).handle200();
     }
 
     ArrayList<String> dbget(CGateSession cgate_session, String param_name) throws CGateException
     {
-        return cgate_session.sendCommand("dbget //" + project.getName() + "/" + net_id + (param_name == null ? "" : ("/" + param_name)));
+        return cgate_session.sendCommand("dbget //" + project.getName() + "/" + net_id + (param_name == null ? "" : ("/" + param_name))).toArray();
     }
 
     /**

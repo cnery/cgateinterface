@@ -121,35 +121,35 @@ public class Unit extends CGateObject
     public String getName(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getUnitType(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/UnitType";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getSerialNumber(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/SerialNumber";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getUnitName(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/UnitName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getFirmware(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/FirmwareVersion";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 }

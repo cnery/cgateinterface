@@ -79,21 +79,21 @@ public class Application extends CGateObject
     public String getName(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + String.valueOf(application_id) + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getDescription(CGateSession cgate_session) throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + String.valueOf(application_id) + "/Description";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address);
+        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     ArrayList<String> dbget(CGateSession cgate_session, String param_name) throws CGateException
     {
         return cgate_session.sendCommand("dbget //" + network.getProjectName() + "/" +
-                network.getNetworkID() + "/" + application_id + (param_name == null ? "" : ("/" + param_name)));
+                network.getNetworkID() + "/" + application_id + (param_name == null ? "" : ("/" + param_name))).toArray();
     }
 
     public ArrayList<Group> getGroups(CGateSession cgate_session) throws CGateException

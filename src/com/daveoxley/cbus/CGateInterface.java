@@ -67,6 +67,6 @@ public final class CGateInterface extends CGateObject
      */
     public static void noop(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("noop"));
+        cgate_session.sendCommand("noop").handle200();
     }
 }

@@ -60,7 +60,7 @@ public final class Project extends CGateObject
      */
     public static ArrayList<Project> dir(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project dir");
+        ArrayList<String> resp_array = cgate_session.sendCommand("project dir").toArray();
 
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp_array)
@@ -80,7 +80,7 @@ public final class Project extends CGateObject
      */
     public static ArrayList<Project> list(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project list");
+        ArrayList<String> resp_array = cgate_session.sendCommand("project list").toArray();
 
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp_array)
@@ -101,7 +101,7 @@ public final class Project extends CGateObject
      */
     public static Project newProject(CGateSession cgate_session, String project_name) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project new " + project_name));
+        cgate_session.sendCommand("project new " + project_name).handle200();
 
         Project new_project = new Project();
         new_project.project_name = project_name;
@@ -196,7 +196,7 @@ public final class Project extends CGateObject
      */
     public void close(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project close " + project_name));
+        cgate_session.sendCommand("project close " + project_name).handle200();
     }
 
     /**
@@ -211,7 +211,7 @@ public final class Project extends CGateObject
      */
     public Project copy(CGateSession cgate_session, String target_project_name) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project copy " + project_name + " " + target_project_name));
+        cgate_session.sendCommand("project copy " + project_name + " " + target_project_name).handle200();
 
         Project new_project = new Project();
         new_project.project_name = target_project_name;
@@ -229,7 +229,7 @@ public final class Project extends CGateObject
      */
     public void delete(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project delete " + project_name));
+        cgate_session.sendCommand("project delete " + project_name).handle200();
 
         cgate_session.uncacheObject("project", this);
     }
@@ -244,7 +244,7 @@ public final class Project extends CGateObject
      */
     public void load(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project load " + project_name));
+        cgate_session.sendCommand("project load " + project_name).handle200();
     }
 
     /**
@@ -257,7 +257,7 @@ public final class Project extends CGateObject
      */
     public void start(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project start " + project_name));
+        cgate_session.sendCommand("project start " + project_name).handle200();
     }
 
     /**
@@ -270,6 +270,6 @@ public final class Project extends CGateObject
      */
     public void save(CGateSession cgate_session) throws CGateException
     {
-        handle200Response(cgate_session.sendCommand("project save " + project_name));
+        cgate_session.sendCommand("project save " + project_name).handle200();
     }
 }

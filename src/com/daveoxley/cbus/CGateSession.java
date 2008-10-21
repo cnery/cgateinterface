@@ -38,8 +38,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
@@ -105,7 +103,7 @@ public class CGateSession extends CGateObject
         {
             try
             {
-                sendCommand("quit");
+                sendCommand("quit").toArray();
             }
             catch (Exception e) {}
 
@@ -133,7 +131,7 @@ public class CGateSession extends CGateObject
      * @return ArrayList of C-Gate response lines
      * @throws com.daveoxley.cbus.CGateException
      */
-    ArrayList<String> sendCommand(String cgate_command) throws CGateException
+    Response sendCommand(String cgate_command) throws CGateException
     {
         checkConnected();
 
@@ -158,11 +156,6 @@ public class CGateSession extends CGateObject
         {
             throw new CGateNotConnectedException();
         }
-    }
-
-    private static boolean responseHasMore(String response)
-    {
-        return response.substring(3,4).equals("-");
     }
 
     private abstract class CGateConnection implements Runnable
@@ -359,36 +352,14 @@ public class CGateSession extends CGateObject
             super(server, port, true);
         }
 
-        private ArrayList<String> sendCommand(String cgate_command) throws CGateException
+        private Response sendCommand(String cgate_command) throws CGateException
         {
             String id = getID();
             BufferedReader response_reader = getReader(id);
 
             command_connection.println("[" + id + "] " + cgate_command);
 
-            ArrayList<String> array_response = new ArrayList<String>();
-            try
-            {
-                boolean has_more = true;
-                while (has_more)
-                {
-                    String response = response_reader.readLine();
-                    array_response.add(response);
-                    has_more = responseHasMore(response);
-                }
-
-                if (log.isDebugEnabled())
-                {
-                    for (String response : array_response)
-                        log.debug("response: " + response);
-                }
-            }
-            catch(IOException e)
-            {
-                throw new CGateException(e);
-            }
-
-            return array_response;
+            return new Response(response_reader);
         }
 
         private synchronized String getID()
@@ -416,7 +387,7 @@ public class CGateSession extends CGateObject
                 writer.write(actual_response);
                 writer.newLine();
 
-                if (!responseHasMore(actual_response))
+                if (!Response.responseHasMore(actual_response))
                 {
                     writer.flush();
                     writer.close();
