@@ -33,8 +33,9 @@ public class Group extends CGateObject
 
     private boolean on_network;
 
-    Group(Application application, String cgate_response, boolean tree_resp)
+    Group(CGateSession cgate_session, Application application, String cgate_response, boolean tree_resp)
     {
+        super(cgate_session);
         this.application = application;
         this.on_network = tree_resp;
         if (tree_resp)
@@ -59,11 +60,11 @@ public class Group extends CGateObject
 
         if (!application_type.equals("p"))
         {
-            Application application = network.getApplication(cgate_session, Integer.parseInt(application_type));
+            Application application = network.getApplication(Integer.parseInt(application_type));
             Group group = (Group)application.getCachedObject("group", String.valueOf(group_id));
             if (group == null)
             {
-                group = new Group(application, response, true);
+                group = new Group(cgate_session, application, response, true);
                 application.cacheObject("group", group);
             }
             return group;
@@ -82,7 +83,7 @@ public class Group extends CGateObject
         Group group = (Group)application.getCachedObject("group", group_id);
         if (group == null)
         {
-            group = new Group(application, response, false);
+            group = new Group(cgate_session, application, response, false);
             application.cacheObject("group", group);
         }
         return group;
@@ -115,11 +116,11 @@ public class Group extends CGateObject
         return application.getNetwork();
     }
 
-    public String getName(CGateSession cgate_session) throws CGateException
+    public String getName() throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" +
                 String.valueOf(application.getApplicationID()) + "/" + group_id + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
@@ -128,14 +129,13 @@ public class Group extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.79</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public Response on(CGateSession cgate_session) throws CGateException
+    public Response on() throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
                 "/" + application.getApplicationID() + "/" + getGroupID();
-        return cgate_session.sendCommand("on " + address);
+        return getCGateSession().sendCommand("on " + address);
     }
 
     /**
@@ -143,14 +143,13 @@ public class Group extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.77</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public Response off(CGateSession cgate_session) throws CGateException
+    public Response off() throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
                 "/" + application.getApplicationID() + "/" + getGroupID();
-        return cgate_session.sendCommand("off " + address);
+        return getCGateSession().sendCommand("off " + address);
     }
 
     /**
@@ -158,15 +157,14 @@ public class Group extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.100</i></a>
-     * @param cgate_session The C-Gate session
      * @param level
      * @param seconds
      * @throws CGateException
      */
-    public Response ramp(CGateSession cgate_session, int level, int seconds) throws CGateException
+    public Response ramp(int level, int seconds) throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
                 "/" + application.getApplicationID() + "/" + getGroupID();
-        return cgate_session.sendCommand("ramp " + address + " " + level + " " + seconds + "s");
+        return getCGateSession().sendCommand("ramp " + address + " " + level + " " + seconds + "s");
     }
 }

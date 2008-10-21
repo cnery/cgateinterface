@@ -31,8 +31,9 @@ public class Application extends CGateObject
 
     private int application_id;
 
-    private Application(Network network, int application_id)
+    private Application(CGateSession cgate_session, Network network, int application_id)
     {
+        super(cgate_session);
         this.network = network;
         this.application_id = application_id;
         setupSubtreeCache("group");
@@ -55,7 +56,7 @@ public class Application extends CGateObject
         Application application = (Application)network.getCachedObject("application", application_id);
         if (application == null)
         {
-            application = new Application(network, Integer.parseInt(application_id));
+            application = new Application(cgate_session, network, Integer.parseInt(application_id));
             network.cacheObject("application", application);
         }
         return application;
@@ -76,31 +77,31 @@ public class Application extends CGateObject
         return Integer.toHexString(application_id);
     }
 
-    public String getName(CGateSession cgate_session) throws CGateException
+    public String getName() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + String.valueOf(application_id) + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    public String getDescription(CGateSession cgate_session) throws CGateException
+    public String getDescription() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + String.valueOf(application_id) + "/Description";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    Response dbget(CGateSession cgate_session, String param_name) throws CGateException
+    Response dbget(String param_name) throws CGateException
     {
-        return cgate_session.sendCommand("dbget //" + network.getProjectName() + "/" +
+        return getCGateSession().sendCommand("dbget //" + network.getProjectName() + "/" +
                 network.getNetworkID() + "/" + application_id + (param_name == null ? "" : ("/" + param_name)));
     }
 
-    public ArrayList<Group> getGroups(CGateSession cgate_session) throws CGateException
+    public ArrayList<Group> getGroups() throws CGateException
     {
-        network.tree(cgate_session);
+        network.tree();
 
-        Response resp = dbget(cgate_session, null);
+        Response resp = dbget(null);
 
         int number_of_groups = -1;
         for (String response : resp) {
@@ -115,8 +116,8 @@ public class Application extends CGateObject
 
         ArrayList<Group> groups = new ArrayList<Group>();
         for (int i = 1; i <= number_of_groups; i++) {
-            ArrayList<String> resp_array = dbget(cgate_session, "Group[" + i + "]/Address").toArray();
-            Group group = Group.getOrCreateGroup(cgate_session, this, resp_array.get(0));
+            ArrayList<String> resp_array = dbget("Group[" + i + "]/Address").toArray();
+            Group group = Group.getOrCreateGroup(getCGateSession(), this, resp_array.get(0));
             if (group != null)
                 groups.add(group);
         }

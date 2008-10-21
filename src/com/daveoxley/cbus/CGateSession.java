@@ -63,6 +63,7 @@ public class CGateSession extends CGateObject
 
     CGateSession(InetAddress cgate_server, int command_port, int event_port) throws CGateConnectException
     {
+        super(null);
         setupSubtreeCache("project");
         try {
             command_connection = new CommandConnection(cgate_server, command_port);
@@ -81,6 +82,12 @@ public class CGateSession extends CGateObject
             catch (Exception e2) {}
             throw e;
         }
+    }
+
+    @Override
+    protected CGateSession getCGateSession()
+    {
+        return this;
     }
 
     @Override

@@ -27,12 +27,17 @@ import java.net.InetAddress;
  */
 public final class CGateInterface extends CGateObject
 {
+    private CGateInterface()
+    {
+        super(null);
+    }
+
     /**
      * Retrieve the CGateInterface library version.
      *
      * @return The CGateInterface version
      */
-    public String getVersion()
+    public static String getVersion()
     {
         return "0.1-dev";
     }

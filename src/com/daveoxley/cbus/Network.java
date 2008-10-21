@@ -32,8 +32,9 @@ public final class Network extends CGateObject
 
     private int net_id;
 
-    private Network(Project project, String cgate_response) throws CGateException
+    private Network(CGateSession cgate_session, Project project, String cgate_response) throws CGateException
     {
+        super(cgate_session);
         this.project = project;
         this.net_id = getNetworkID(project, cgate_response);
         setupSubtreeCache("application");
@@ -69,14 +70,13 @@ public final class Network extends CGateObject
     /**
      * Retrieve the Unit Object for the specified unit id.
      * 
-     * @param cgate_session The CGateSession
      * @param unit_id The unit to retrieve
      * @return The Unit
      * @throws CGateException
      */
-    public Application getApplication(CGateSession cgate_session, int application_id) throws CGateException
+    public Application getApplication(int application_id) throws CGateException
     {
-        getApplications(cgate_session);
+        getApplications();
 
         return (Application)getCachedObject("application", String.valueOf(application_id));
     }
@@ -84,14 +84,13 @@ public final class Network extends CGateObject
     /**
      * Retrieve the Unit Object for the specified unit id.
      * 
-     * @param cgate_session The CGateSession
      * @param unit_id The unit to retrieve
      * @return The Unit
      * @throws CGateException
      */
-    public Unit getUnit(CGateSession cgate_session, int unit_id) throws CGateException
+    public Unit getUnit(int unit_id) throws CGateException
     {
-        getUnits(cgate_session);
+        getUnits();
 
         return (Unit)getCachedObject("unit", String.valueOf(unit_id));
     }
@@ -108,7 +107,7 @@ public final class Network extends CGateObject
         Network network = (Network)project.getCachedObject("network", String.valueOf(net_id));
         if (network == null)
         {
-            network = new Network(project, cgate_response);
+            network = new Network(cgate_session, project, cgate_response);
             project.cacheObject("network", network);
         }
         return network;
@@ -151,28 +150,28 @@ public final class Network extends CGateObject
         return project.getName();
     }
 
-    public String getName(CGateSession cgate_session) throws CGateException
+    public String getName() throws CGateException
     {
         String address = "//" + project.getName() + "/" + net_id + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    public String getType(CGateSession cgate_session) throws CGateException
+    public String getType() throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " Type").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("show //" + project.getName() + "/" + net_id + " Type").toArray();
         return responseToMap(resp_array.get(0)).get("Type");
     }
 
-    public String getInterfaceAddress(CGateSession cgate_session) throws CGateException
+    public String getInterfaceAddress() throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " InterfaceAddress").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("show //" + project.getName() + "/" + net_id + " InterfaceAddress").toArray();
         return responseToMap(resp_array.get(0)).get("InterfaceAddress");
     }
 
-    public String getState(CGateSession cgate_session) throws CGateException
+    public String getState() throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("show //" + project.getName() + "/" + net_id + " State").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("show //" + project.getName() + "/" + net_id + " State").toArray();
         return responseToMap(resp_array.get(0)).get("State");
     }
 
@@ -184,11 +183,11 @@ public final class Network extends CGateObject
         return response.substring(index + network_address.length(), application_index);
     }
 
-    public ArrayList<Unit> getUnits(CGateSession cgate_session) throws CGateException
+    public ArrayList<Unit> getUnits() throws CGateException
     {
-        tree(cgate_session);
+        tree();
 
-        Response resp = dbget(cgate_session, null);
+        Response resp = dbget(null);
 
         int number_of_units = -1;
         for (String response : resp) {
@@ -203,8 +202,8 @@ public final class Network extends CGateObject
 
         ArrayList<Unit> units = new ArrayList<Unit>();
         for (int i = 1; i <= number_of_units; i++) {
-            ArrayList<String> resp_array = dbget(cgate_session, "Unit[" + i + "]/Address").toArray();
-            Unit unit = Unit.getOrCreateUnit(cgate_session, this, resp_array.get(0), false);
+            ArrayList<String> resp_array = dbget("Unit[" + i + "]/Address").toArray();
+            Unit unit = Unit.getOrCreateUnit(getCGateSession(), this, resp_array.get(0), false);
             if (unit != null)
                 units.add(unit);
         }
@@ -217,12 +216,12 @@ public final class Network extends CGateObject
      *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.124</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    void tree(CGateSession cgate_session) throws CGateException
+    void tree() throws CGateException
     {
-        getApplications(cgate_session);
+        CGateSession cgate_session = getCGateSession();
+        getApplications();
         Response resp = cgate_session.sendCommand("tree //" + project.getName() + "/" + net_id);
 
         for (String response : resp)
@@ -242,29 +241,28 @@ public final class Network extends CGateObject
      *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.65</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public void open(CGateSession cgate_session) throws CGateException
+    public void open() throws CGateException
     {
-        cgate_session.sendCommand("net open //" + project.getName() + "/" + net_id).handle200();
+        getCGateSession().sendCommand("net open //" + project.getName() + "/" + net_id).handle200();
     }
 
-    Response dbget(CGateSession cgate_session, String param_name) throws CGateException
+    Response dbget(String param_name) throws CGateException
     {
-        return cgate_session.sendCommand("dbget //" + project.getName() + "/" + net_id + (param_name == null ? "" : ("/" + param_name)));
+        return getCGateSession().sendCommand("dbget //" + project.getName() + "/" + net_id + (param_name == null ? "" : ("/" + param_name)));
     }
 
     /**
      * Get all Application objects for this Network.
      * 
-     * @param cgate_session The CGateSession
      * @return ArrayList of Applications
      * @throws CGateException
      */
-    public ArrayList<Application> getApplications(CGateSession cgate_session) throws CGateException
+    public ArrayList<Application> getApplications() throws CGateException
     {
-        Response resp = dbget(cgate_session, null);
+        CGateSession cgate_session = getCGateSession();
+        Response resp = dbget(null);
 
         int number_of_applications = -1;
         for (String response : resp)
@@ -282,7 +280,7 @@ public final class Network extends CGateObject
         ArrayList<Application> applications = new ArrayList<Application>();
         for (int i = 1; i <= number_of_applications; i++)
         {
-            ArrayList<String> resp_array = dbget(cgate_session, "Application[" + i + "]/Address").toArray();
+            ArrayList<String> resp_array = dbget("Application[" + i + "]/Address").toArray();
             Application application = Application.getOrCreateApplication(cgate_session, this, resp_array.get(0));
             if (application != null)
                 applications.add(application);

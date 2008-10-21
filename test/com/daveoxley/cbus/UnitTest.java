@@ -66,7 +66,7 @@ public class UnitTest {
         String example_tree_resp2 = "320- //OXLEY/254/56/10 ($a) level=0 state=ok units=6,14";
 
         Project project = Project.getProject(session, "OXLEY");
-        Network network = project.getNetwork(session, 254);
+        Network network = project.getNetwork(254);
 
         assertEquals("p", Network.getApplicationType(network, example_tree_resp1));
         assertEquals("56", Network.getApplicationType(network, example_tree_resp2));
@@ -83,7 +83,7 @@ public class UnitTest {
         String example_tree_resp2 = "320- //OXLEY/254/56/10 ($a) level=0 state=ok units=6,14";
 
         Project project = Project.getProject(session, "OXLEY");
-        Network network = project.getNetwork(session, 254);
+        Network network = project.getNetwork(254);
 
         assertEquals(14, Unit.getUnitID(network, example_tree_resp1));
         assertEquals(10, Unit.getUnitID(network, example_tree_resp2));

@@ -86,7 +86,7 @@ public class NetworkTest {
     public void testListApplications() throws CGateException {
         System.out.println("listApplications");
 
-        Network network = Project.getProject(session, "OXLEY").getNetwork(session, 254);
-        network.getApplications(session);
+        Network network = Project.getProject(session, "OXLEY").getNetwork(254);
+        network.getApplications();
     }
 }

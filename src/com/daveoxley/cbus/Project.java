@@ -30,14 +30,15 @@ public final class Project extends CGateObject
 {
     private String project_name;
 
-    private Project()
+    private Project(CGateSession cgate_session)
     {
+        super(cgate_session);
         setupSubtreeCache("network");
     }
 
-    private Project(String cgate_response)
+    private Project(CGateSession cgate_session, String cgate_response)
     {
-        this();
+        this(cgate_session);
         HashMap<String,String> resp_map = responseToMap(cgate_response);
         this.project_name = resp_map.get("project");
     }
@@ -103,7 +104,7 @@ public final class Project extends CGateObject
     {
         cgate_session.sendCommand("project new " + project_name).handle200();
 
-        Project new_project = new Project();
+        Project new_project = new Project(cgate_session);
         new_project.project_name = project_name;
         cgate_session.cacheObject("project", new_project);
         return new_project;
@@ -127,14 +128,13 @@ public final class Project extends CGateObject
     /**
      * Retrieve the Network Object for the specified network id.
      * 
-     * @param cgate_session The CGateSession
      * @param network_id The network to retrieve
      * @return The Network
      * @throws CGateException
      */
-    public Network getNetwork(CGateSession cgate_session, int network_id) throws CGateException
+    public Network getNetwork(int network_id) throws CGateException
     {
-        Network.listAll(cgate_session);
+        Network.listAll(getCGateSession());
 
         return (Network)getCachedObject("network", String.valueOf(network_id));
     }
@@ -142,13 +142,12 @@ public final class Project extends CGateObject
     /**
      * Get all Network objects for this Project.
      * 
-     * @param cgate_session The CGateSession
      * @return ArrayList of Networks
      * @throws CGateException
      */
-    public ArrayList<Network> getNetworks(CGateSession cgate_session) throws CGateException
+    public ArrayList<Network> getNetworks() throws CGateException
     {
-        Network.listAll(cgate_session);
+        Network.listAll(getCGateSession());
 
         ArrayList<Network> networks = new ArrayList<Network>();
         for (CGateObject network : getAllCachedObjects("network"))
@@ -170,7 +169,7 @@ public final class Project extends CGateObject
         Project project = (Project)cgate_session.getCachedObject("project", project_name);
         if (project == null)
         {
-            project = new Project(cgate_response);
+            project = new Project(cgate_session, cgate_response);
             cgate_session.cacheObject("project", project);
         }
         return project;
@@ -191,12 +190,11 @@ public final class Project extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.86</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public void close(CGateSession cgate_session) throws CGateException
+    public void close() throws CGateException
     {
-        cgate_session.sendCommand("project close " + project_name).handle200();
+        getCGateSession().sendCommand("project close " + project_name).handle200();
     }
 
     /**
@@ -204,16 +202,16 @@ public final class Project extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.87</i></a>
-     * @param cgate_session The C-Gate session
      * @param project_name The project name of the new copy
      * @return Project The new copy of the current Project
      * @throws CGateException
      */
-    public Project copy(CGateSession cgate_session, String target_project_name) throws CGateException
+    public Project copy(String target_project_name) throws CGateException
     {
+        CGateSession cgate_session = getCGateSession();
         cgate_session.sendCommand("project copy " + project_name + " " + target_project_name).handle200();
 
-        Project new_project = new Project();
+        Project new_project = new Project(cgate_session);
         new_project.project_name = target_project_name;
         cgate_session.cacheObject("project", new_project);
         return new_project;
@@ -224,11 +222,11 @@ public final class Project extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.88</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public void delete(CGateSession cgate_session) throws CGateException
+    public void delete() throws CGateException
     {
+        CGateSession cgate_session = getCGateSession();
         cgate_session.sendCommand("project delete " + project_name).handle200();
 
         cgate_session.uncacheObject("project", this);
@@ -239,12 +237,11 @@ public final class Project extends CGateObject
      * 
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.91</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public void load(CGateSession cgate_session) throws CGateException
+    public void load() throws CGateException
     {
-        cgate_session.sendCommand("project load " + project_name).handle200();
+        getCGateSession().sendCommand("project load " + project_name).handle200();
     }
 
     /**
@@ -252,12 +249,11 @@ public final class Project extends CGateObject
      *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.96</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public void start(CGateSession cgate_session) throws CGateException
+    public void start() throws CGateException
     {
-        cgate_session.sendCommand("project start " + project_name).handle200();
+        getCGateSession().sendCommand("project start " + project_name).handle200();
     }
 
     /**
@@ -265,11 +261,10 @@ public final class Project extends CGateObject
      *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.95</i></a>
-     * @param cgate_session The C-Gate session
      * @throws CGateException
      */
-    public void save(CGateSession cgate_session) throws CGateException
+    public void save() throws CGateException
     {
-        cgate_session.sendCommand("project save " + project_name).handle200();
+        getCGateSession().sendCommand("project save " + project_name).handle200();
     }
 }

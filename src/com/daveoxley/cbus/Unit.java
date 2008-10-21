@@ -33,8 +33,9 @@ public class Unit extends CGateObject
 
     private boolean on_network;
 
-    Unit(Network network, String cgate_response, boolean tree_resp)
+    Unit(CGateSession cgate_session, Network network, String cgate_response, boolean tree_resp)
     {
+        super(cgate_session);
         this.network = network;
         this.on_network = tree_resp;
         if (tree_resp)
@@ -64,7 +65,7 @@ public class Unit extends CGateObject
                 Unit unit = (Unit)network.getCachedObject("unit", String.valueOf(unit_id));
                 if (unit == null)
                 {
-                    unit = new Unit(network, response, true);
+                    unit = new Unit(cgate_session, network, response, true);
                     network.cacheObject("unit", unit);
                 }
                 return unit;
@@ -79,7 +80,7 @@ public class Unit extends CGateObject
             Unit unit = (Unit)network.getCachedObject("unit", unit_id);
             if (unit == null)
             {
-                unit = new Unit(network, response, false);
+                unit = new Unit(cgate_session, network, response, false);
                 network.cacheObject("unit", unit);
             }
             return unit;
@@ -113,43 +114,48 @@ public class Unit extends CGateObject
         return network;
     }
 
+    public String getExistsOnNetwork()
+    {
+        return onNetwork() ? "Yes" : "No";
+    }
+
     public boolean onNetwork()
     {
         return on_network;
     }
 
-    public String getName(CGateSession cgate_session) throws CGateException
+    public String getName() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/TagName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    public String getUnitType(CGateSession cgate_session) throws CGateException
+    public String getUnitType() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/UnitType";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    public String getSerialNumber(CGateSession cgate_session) throws CGateException
+    public String getSerialNumber() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/SerialNumber";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    public String getUnitName(CGateSession cgate_session) throws CGateException
+    public String getUnitName() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/UnitName";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
-    public String getFirmware(CGateSession cgate_session) throws CGateException
+    public String getFirmware() throws CGateException
     {
         String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/FirmwareVersion";
-        ArrayList<String> resp_array = cgate_session.sendCommand("dbget " + address).toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 }

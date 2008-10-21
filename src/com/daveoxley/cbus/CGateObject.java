@@ -19,7 +19,6 @@
 
 package com.daveoxley.cbus;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -29,6 +28,18 @@ import java.util.HashMap;
  */
 public abstract class CGateObject
 {
+    private final CGateSession cgate_session;
+
+    protected CGateObject(CGateSession cgate_session)
+    {
+        this.cgate_session = cgate_session;
+    }
+
+    protected CGateSession getCGateSession()
+    {
+        return cgate_session;
+    }
+
     static HashMap<String,String> responseToMap(String cgate_response)
     {
         return responseToMap(cgate_response, false);
