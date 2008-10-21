@@ -60,10 +60,10 @@ public final class Project extends CGateObject
      */
     public static ArrayList<Project> dir(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project dir").toArray();
+        Response resp = cgate_session.sendCommand("project dir");
 
         ArrayList<Project> projects = new ArrayList<Project>();
-        for (String response : resp_array)
+        for (String response : resp)
             projects.add(getOrCreateProject(cgate_session, response));
 
         return projects;
@@ -80,10 +80,10 @@ public final class Project extends CGateObject
      */
     public static ArrayList<Project> list(CGateSession cgate_session) throws CGateException
     {
-        ArrayList<String> resp_array = cgate_session.sendCommand("project list").toArray();
+        Response resp = cgate_session.sendCommand("project list");
 
         ArrayList<Project> projects = new ArrayList<Project>();
-        for (String response : resp_array)
+        for (String response : resp)
             projects.add(getOrCreateProject(cgate_session, response));
 
         return projects;

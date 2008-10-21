@@ -24,6 +24,8 @@ import com.daveoxley.cbus.threadpool.ThreadImplPool;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
@@ -33,7 +35,7 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class Response
+public class Response implements Iterable<String>
 {
     private final static Log log = LogFactory.getLog(Response.class);
 
@@ -52,6 +54,8 @@ public class Response
 
     private final Object response_mutex = new Object();
 
+    private final Object iterator_mutex = new Object();
+
     private BufferedReader response_reader;
 
     private ThreadImpl response_thread;
@@ -69,13 +73,21 @@ public class Response
             this.response_thread.execute(new Runnable() {
                 public void run()
                 {
-                    ArrayList<String> array_response = new ArrayList<String>();
+                    synchronized (iterator_mutex)
+                    {
+                        array_response = new ArrayList<String>();
+                    }
+
                     try {
                         boolean has_more = true;
                         while (has_more)
                         {
                             String response = Response.this.response_reader.readLine();
-                            array_response.add(response);
+                            synchronized (Response.this.iterator_mutex)
+                            {
+                                array_response.add(response);
+                                Response.this.iterator_mutex.notifyAll();
+                            }
                             has_more = responseHasMore(response);
                         }
 
@@ -97,9 +109,12 @@ public class Response
                         Response.this.response_thread = null;
                         synchronized (Response.this.response_mutex)
                         {
-                            Response.this.array_response = array_response;
-                            Response.this.response_generated = true;
-                            Response.this.response_mutex.notifyAll();
+                            synchronized (Response.this.iterator_mutex)
+                            {
+                                Response.this.response_generated = true;
+                                Response.this.response_mutex.notifyAll();
+                                Response.this.iterator_mutex.notifyAll();
+                            }
                         }
                     }
                 }
@@ -131,6 +146,51 @@ public class Response
         }
 
         return array_response;
+    }
+
+    public Iterator<String> iterator()
+    {
+        return new Iterator<String>() {
+            private int index = 0;
+
+            public boolean hasNext()
+            {
+                synchronized (iterator_mutex)
+                {
+                    while (array_response == null || (index >= array_response.size() && !response_generated))
+                    {
+                        try
+                        {
+                            iterator_mutex.wait();
+                        }
+                        catch (InterruptedException ie) {}
+                    }
+
+                    if (index < array_response.size())
+                        return true;
+
+                    if (response_generated)
+                        return false;
+
+                    throw new IllegalStateException("Impossible");
+                }
+            }
+
+            public String next()
+            {
+                synchronized (iterator_mutex)
+                {
+                    if (index >= array_response.size())
+                        throw new NoSuchElementException();
+
+                    return array_response.get(index++);
+                }
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException("remove not supported");
+            }
+        };
     }
 
     public void handle200() throws CGateException
