@@ -116,6 +116,12 @@ public class Group extends CGateObject
         return application.getNetwork();
     }
 
+    public String getAddress()
+    {
+        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
+                "/" + application.getApplicationID() + "/" + getGroupID();
+    }
+
     public String getName() throws CGateException
     {
         String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" +
@@ -133,9 +139,7 @@ public class Group extends CGateObject
      */
     public Response on() throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
-                "/" + application.getApplicationID() + "/" + getGroupID();
-        return getCGateSession().sendCommand("on " + address);
+        return getCGateSession().sendCommand("on " + getAddress());
     }
 
     /**
@@ -147,9 +151,7 @@ public class Group extends CGateObject
      */
     public Response off() throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
-                "/" + application.getApplicationID() + "/" + getGroupID();
-        return getCGateSession().sendCommand("off " + address);
+        return getCGateSession().sendCommand("off " + getAddress());
     }
 
     /**
@@ -163,8 +165,6 @@ public class Group extends CGateObject
      */
     public Response ramp(int level, int seconds) throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
-                "/" + application.getApplicationID() + "/" + getGroupID();
-        return getCGateSession().sendCommand("ramp " + address + " " + level + " " + seconds + "s");
+        return getCGateSession().sendCommand("ramp " + getAddress() + " " + level + " " + seconds + "s");
     }
 }
