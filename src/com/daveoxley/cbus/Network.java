@@ -47,6 +47,58 @@ public final class Network extends CGateObject
         return String.valueOf(net_id);
     }
 
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException
+    {
+        if (address.startsWith("//"))
+            throw new IllegalArgumentException("Address must be a relative address. i.e. Not starting with //");
+
+        boolean return_next = false;
+        int next_part_index = address.indexOf("/");
+        if (next_part_index == -1)
+        {
+            next_part_index = address.length();
+            return_next = true;
+        }
+
+        String next_part = address.substring(0, next_part_index);
+        if (next_part.equals("p"))
+        {
+            if (return_next)
+                throw new IllegalArgumentException("The address must not end with p");
+
+            int unit_part_index = address.substring(next_part_index + 1).indexOf("/");
+            if (unit_part_index == -1)
+            {
+                unit_part_index = address.length();
+                return_next = true;
+            }
+
+            next_part = address.substring(next_part_index + 1, unit_part_index);
+            int unit_id = Integer.parseInt(next_part);
+            Unit unit = getUnit(unit_id);
+            if (return_next)
+                return unit;
+
+            return unit.getCGateObject(address.substring(next_part_index + 1));
+        }
+        else
+        {
+            int application_id = Integer.parseInt(next_part);
+            Application application = getApplication(application_id);
+            if (return_next)
+                return application;
+
+            return application.getCGateObject(address.substring(next_part_index + 1));
+        }
+    }
+
+    @Override
+    public String getAddress()
+    {
+        return "//" + getProjectName() + "/" + getNetworkID();
+    }
+
     /**
      * Issue a <code>net list_all</code> to the C-Gate server.
      * 
@@ -152,32 +204,32 @@ public final class Network extends CGateObject
 
     public String getName() throws CGateException
     {
-        String address = "//" + project.getName() + "/" + net_id + "/TagName";
+        String address = getAddress() + "/TagName";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getType() throws CGateException
     {
-        ArrayList<String> resp_array = getCGateSession().sendCommand("show //" + project.getName() + "/" + net_id + " Type").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("show " + getAddress() + " Type").toArray();
         return responseToMap(resp_array.get(0)).get("Type");
     }
 
     public String getInterfaceAddress() throws CGateException
     {
-        ArrayList<String> resp_array = getCGateSession().sendCommand("show //" + project.getName() + "/" + net_id + " InterfaceAddress").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("show " + getAddress() + " InterfaceAddress").toArray();
         return responseToMap(resp_array.get(0)).get("InterfaceAddress");
     }
 
     public String getState() throws CGateException
     {
-        ArrayList<String> resp_array = getCGateSession().sendCommand("show //" + project.getName() + "/" + net_id + " State").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("show " + getAddress() + " State").toArray();
         return responseToMap(resp_array.get(0)).get("State");
     }
 
     static String getApplicationType(Network network, String response)
     {
-        String network_address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/";
+        String network_address = network.getAddress() + "/";
         int index = response.indexOf(network_address);
         int application_index = response.indexOf("/", index + network_address.length());
         return response.substring(index + network_address.length(), application_index);
@@ -191,7 +243,7 @@ public final class Network extends CGateObject
 
         int number_of_units = -1;
         for (String response : resp) {
-            String address = "//" + project.getName() + "/" + net_id + "/Unit[";
+            String address = "" + getAddress() + "/Unit[";
             int index = response.indexOf(address);
             if (index > -1) {
                 int index2 = response.indexOf("]", index + address.length());
@@ -222,11 +274,11 @@ public final class Network extends CGateObject
     {
         CGateSession cgate_session = getCGateSession();
         getApplications();
-        Response resp = cgate_session.sendCommand("tree //" + project.getName() + "/" + net_id);
+        Response resp = cgate_session.sendCommand("tree " + getAddress());
 
         for (String response : resp)
         {
-            if (response.indexOf("//" + project.getName() + "/" + net_id + "/") > -1)
+            if (response.indexOf("" + getAddress() + "/") > -1)
             {
                 if (getApplicationType(this, response).equals("p"))
                     Unit.getOrCreateUnit(cgate_session, this, response, true);
@@ -245,12 +297,12 @@ public final class Network extends CGateObject
      */
     public void open() throws CGateException
     {
-        getCGateSession().sendCommand("net open //" + project.getName() + "/" + net_id).handle200();
+        getCGateSession().sendCommand("net open " + getAddress()).handle200();
     }
 
     Response dbget(String param_name) throws CGateException
     {
-        return getCGateSession().sendCommand("dbget //" + project.getName() + "/" + net_id + (param_name == null ? "" : ("/" + param_name)));
+        return getCGateSession().sendCommand("dbget " + getAddress() + (param_name == null ? "" : ("/" + param_name)));
     }
 
     /**
@@ -267,7 +319,7 @@ public final class Network extends CGateObject
         int number_of_applications = -1;
         for (String response : resp)
         {
-            String address = "//" + project.getName() + "/" + net_id + "/Application[";
+            String address = "" + getAddress() + "/Application[";
             int index = response.indexOf(address);
             if (index > -1)
             {

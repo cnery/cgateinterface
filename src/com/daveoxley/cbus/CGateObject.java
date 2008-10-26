@@ -79,6 +79,10 @@ public abstract class CGateObject
 
     private final HashMap<String,HashMap<String,CGateObject>> subtree_cache = new HashMap<String,HashMap<String,CGateObject>>();
 
+    public abstract CGateObject getCGateObject(String address) throws CGateException;
+
+    public abstract String getAddress();
+
     protected void setupSubtreeCache(String cache_key)
     {
         subtree_cache.put(cache_key, new HashMap<String,CGateObject>());

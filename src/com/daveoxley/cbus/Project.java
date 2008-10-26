@@ -49,6 +49,34 @@ public final class Project extends CGateObject
         return project_name;
     }
 
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException
+    {
+        if (address.startsWith("//"))
+            throw new IllegalArgumentException("Address must be a relative address. i.e. Not starting with //");
+
+        boolean return_next = false;
+        int next_part_index = address.indexOf("/");
+        if (next_part_index == -1)
+        {
+            next_part_index = address.length();
+            return_next = true;
+        }
+
+        int network_id = Integer.parseInt(address.substring(0, next_part_index));
+        Network network = getNetwork(network_id);
+        if (return_next)
+            return network;
+
+        return network.getCGateObject(address.substring(next_part_index + 1));
+    }
+
+    @Override
+    public String getAddress()
+    {
+        return "//" + getName();
+    }
+
     /**
      * Issue a <code>project dir</code> and <code>project list</code> to the
      * C-Gate server.

@@ -45,6 +45,34 @@ public class Application extends CGateObject
         return String.valueOf(application_id);
     }
 
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException
+    {
+        if (address.startsWith("//"))
+            throw new IllegalArgumentException("Address must be a relative address. i.e. Not starting with //");
+
+        boolean return_next = false;
+        int next_part_index = address.indexOf("/");
+        if (next_part_index == -1)
+        {
+            next_part_index = address.length();
+            return_next = true;
+        }
+
+        int group_id = Integer.parseInt(address.substring(0, next_part_index));
+        Group group = getGroup(group_id);
+        if (return_next)
+            return group;
+
+        return group.getCGateObject(address.substring(next_part_index + 1));
+    }
+
+    @Override
+    public String getAddress()
+    {
+        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getApplicationID();
+    }
+
     static Application getOrCreateApplication(CGateSession cgate_session, Network network, String response)
     {
         int index = response.indexOf("=");
@@ -79,22 +107,21 @@ public class Application extends CGateObject
 
     public String getName() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + String.valueOf(application_id) + "/TagName";
+        String address = getAddress() + "/TagName";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getDescription() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + String.valueOf(application_id) + "/Description";
+        String address = getAddress() + "/Description";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     Response dbget(String param_name) throws CGateException
     {
-        return getCGateSession().sendCommand("dbget //" + network.getProjectName() + "/" +
-                network.getNetworkID() + "/" + application_id + (param_name == null ? "" : ("/" + param_name)));
+        return getCGateSession().sendCommand("dbget " + getAddress() + (param_name == null ? "" : ("/" + param_name)));
     }
 
     public ArrayList<Group> getGroups() throws CGateException
@@ -105,7 +132,7 @@ public class Application extends CGateObject
 
         int number_of_groups = -1;
         for (String response : resp) {
-            String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + application_id + "/Group[";
+            String address = getAddress() + "/Group[";
             int index = response.indexOf(address);
             if (index > -1) {
                 int index2 = response.indexOf("]", index + address.length());
@@ -123,5 +150,19 @@ public class Application extends CGateObject
         }
 
         return groups;
+    }
+
+    /**
+     * Retrieve the Group Object for the specified group id.
+     *
+     * @param group_id The group to retrieve
+     * @return The Group
+     * @throws CGateException
+     */
+    public Group getGroup(int group_id) throws CGateException
+    {
+        getGroups();
+
+        return (Group)getCachedObject("group", String.valueOf(group_id));
     }
 }

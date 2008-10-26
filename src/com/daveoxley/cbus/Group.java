@@ -53,6 +53,19 @@ public class Group extends CGateObject
         return String.valueOf(group_id);
     }
 
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException
+    {
+        throw new IllegalArgumentException("There are no CGateObjects owned by a Group");
+    }
+
+    @Override
+    public String getAddress()
+    {
+        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
+                "/" + application.getApplicationID() + "/" + getGroupID();
+    }
+
     static Group getOrCreateGroup(CGateSession cgate_session, Network network, String response) throws CGateException
     {
         String application_type = Network.getApplicationType(network, response);
@@ -92,7 +105,7 @@ public class Group extends CGateObject
     static int getGroupID(Network network, String response)
     {
         String application_type = Network.getApplicationType(network, response);
-        String application_address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/" + application_type + "/";
+        String application_address = network.getAddress() + "/" + application_type + "/";
         int index = response.indexOf(application_address);
         int unit_index = response.indexOf(" ", index + 1);
         return Integer.parseInt(response.substring(index + application_address.length(), unit_index).trim());
@@ -116,16 +129,9 @@ public class Group extends CGateObject
         return application.getNetwork();
     }
 
-    public String getAddress()
-    {
-        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
-                "/" + application.getApplicationID() + "/" + getGroupID();
-    }
-
     public String getName() throws CGateException
     {
-        String address = "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" +
-                String.valueOf(application.getApplicationID()) + "/" + group_id + "/TagName";
+        String address = getAddress() + "/TagName";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }

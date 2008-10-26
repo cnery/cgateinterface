@@ -96,6 +96,34 @@ public class CGateSession extends CGateObject
         return null;
     }
     
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException
+    {
+        if (!address.startsWith("//"))
+            throw new IllegalArgumentException("Address must be a full address. i.e. Starting with //");
+
+        boolean return_next = false;
+        int next_part_index = address.indexOf("/", 2);
+        if (next_part_index == -1)
+        {
+            next_part_index = address.length();
+            return_next = true;
+        }
+
+        String project_name = address.substring(2, next_part_index);
+        Project project = Project.getProject(this, project_name);
+        if (return_next)
+            return project;
+
+        return project.getCGateObject(address.substring(next_part_index + 1));
+    }
+
+    @Override
+    public String getAddress()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Issue a <code>quit</code> to the C-Gate server and close the input and output stream
      * and the command_socket.

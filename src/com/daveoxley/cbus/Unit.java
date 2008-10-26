@@ -53,6 +53,18 @@ public class Unit extends CGateObject
         return String.valueOf(unit_id);
     }
 
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException
+    {
+        throw new IllegalArgumentException("There are no CGateObjects owned by a Unit");
+    }
+
+    @Override
+    public String getAddress()
+    {
+        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/p/" + getUnitID();
+    }
+
     static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response, boolean tree_resp) throws CGateException
     {
         if (tree_resp)
@@ -126,35 +138,35 @@ public class Unit extends CGateObject
 
     public String getName() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/TagName";
+        String address = getAddress() + "/TagName";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getUnitType() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/UnitType";
+        String address = getAddress() + "/UnitType";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getSerialNumber() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/SerialNumber";
+        String address = getAddress() + "/SerialNumber";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getUnitName() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/UnitName";
+        String address = getAddress() + "/UnitName";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getFirmware() throws CGateException
     {
-        String address = "//" + network.getProjectName() + "/" + network.getNetworkID() + "/p/" + unit_id + "/FirmwareVersion";
+        String address = getAddress() + "/FirmwareVersion";
         ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }

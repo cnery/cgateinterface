@@ -48,6 +48,16 @@ public final class CGateInterface extends CGateObject
         return "";
     }
 
+    @Override
+    public CGateObject getCGateObject(String address) throws CGateException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getAddress() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Connect to a C-Gate server using the supplied cgate_server and cgate_port.
      *
