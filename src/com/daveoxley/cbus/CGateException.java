@@ -49,7 +49,7 @@ public class CGateException extends Exception
      */
     public CGateException(Exception e)
     {
-        this(null, e);
+        this(e.getMessage(), e);
     }
 
     /**
@@ -70,7 +70,7 @@ public class CGateException extends Exception
     {
         super(response, e);
 
-        String message = getLocalizedMessage();
+        String message = getMessage();
 
         Throwable traced_exception = e;
         while (traced_exception instanceof InvocationTargetException)
