@@ -39,7 +39,7 @@ public final class CGateInterface extends CGateObject
      */
     public static String getVersion()
     {
-        return "0.1";
+        return "0.2-dev";
     }
 
     @Override
