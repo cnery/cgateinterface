@@ -33,7 +33,7 @@ public class ThreadImpl extends Thread
 
     private Runnable runnable = null;
 
-    private ThreadImplPool pool = null;
+    private volatile ThreadImplPool pool = null;
 
     @Override
     public synchronized void start()

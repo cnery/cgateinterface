@@ -21,6 +21,8 @@ package com.daveoxley.cbus;
 
 import com.daveoxley.cbus.events.DebugEventCallback;
 import com.daveoxley.cbus.events.EventCallback;
+import com.daveoxley.cbus.status.DebugStatusChangeCallback;
+import com.daveoxley.cbus.status.StatusChangeCallback;
 import com.daveoxley.cbus.threadpool.ThreadImpl;
 import com.daveoxley.cbus.threadpool.ThreadImplPool;
 import java.io.BufferedReader;
@@ -57,19 +59,24 @@ public class CGateSession extends CGateObject
 
     private final EventConnection event_connection;
 
+    private final StatusChangeConnection status_change_connection;
+
     private final PingConnections ping_connections;
 
     private boolean connected = false;
 
-    CGateSession(InetAddress cgate_server, int command_port, int event_port) throws CGateConnectException
+    CGateSession(InetAddress cgate_server, int command_port, int event_port, int status_change_port) throws CGateConnectException
     {
         super(null);
         setupSubtreeCache("project");
         try {
             command_connection = new CommandConnection(cgate_server, command_port);
             event_connection = new EventConnection(cgate_server, event_port);
+            status_change_connection = new StatusChangeConnection(cgate_server, status_change_port);
             if (DebugEventCallback.isDebugEnabled())
                 registerEventCallback(new DebugEventCallback());
+            if (DebugStatusChangeCallback.isDebugEnabled())
+                registerStatusChangeCallback(new DebugStatusChangeCallback());
             connected = true;
             ping_connections = new PingConnections();
         }
@@ -500,6 +507,71 @@ public class CGateSession extends CGateObject
                                 }
                             });
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        new CGateException(e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param event_callback
+     */
+    public void registerStatusChangeCallback(StatusChangeCallback status_change_callback) throws CGateConnectException
+    {
+        status_change_connection.registerStatusChangeCallback(status_change_callback);
+    }
+
+    private class StatusChangeConnection extends CGateConnection
+    {
+        private final ThreadImplPool sc_callback_pool;
+
+        private final List<StatusChangeCallback> sc_callbacks = Collections.synchronizedList(new ArrayList<StatusChangeCallback>());
+
+        private StatusChangeConnection(InetAddress server, int port) throws CGateConnectException
+        {
+            super(server, port, false);
+            Config config = new Config();
+            config.maxActive = 10;
+            config.minIdle   = 2;
+            config.maxIdle   = 5;
+            config.testOnBorrow = false;
+            config.testOnReturn = true;
+            config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
+            config.maxWait = -1;
+            sc_callback_pool = new ThreadImplPool(config);
+        }
+
+        private void registerStatusChangeCallback(StatusChangeCallback event_callback) throws CGateConnectException
+        {
+            sc_callbacks.add(event_callback);
+            start();
+        }
+
+        @Override
+        protected void doRun() throws IOException
+        {
+            final String status_change = getInputReader().readLine();
+            if(status_change != null && status_change.length() > 0)
+            {
+                for (final StatusChangeCallback sc_callback : sc_callbacks)
+                {
+                    if (!continueRunning())
+                        return;
+
+                    try
+                    {
+                        ThreadImpl callback_thread = (ThreadImpl)sc_callback_pool.borrowObject();
+                        callback_thread.execute(new Runnable() {
+                            public void run()
+                            {
+                                sc_callback.processStatusChange(CGateSession.this, status_change);
+                            }
+                        });
                     }
                     catch (Exception e)
                     {

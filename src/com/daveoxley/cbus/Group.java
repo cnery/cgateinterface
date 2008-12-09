@@ -74,13 +74,16 @@ public class Group extends CGateObject
         if (!application_type.equals("p"))
         {
             Application application = network.getApplication(Integer.parseInt(application_type));
-            Group group = (Group)application.getCachedObject("group", String.valueOf(group_id));
-            if (group == null)
+            if (application != null)
             {
-                group = new Group(cgate_session, application, response, true);
-                application.cacheObject("group", group);
+                Group group = (Group)application.getCachedObject("group", String.valueOf(group_id));
+                if (group == null)
+                {
+                    group = new Group(cgate_session, application, response, true);
+                    application.cacheObject("group", group);
+                }
+                return group;
             }
-            return group;
         }
         return null;
     }
@@ -162,7 +165,7 @@ public class Group extends CGateObject
 
     /**
      * Issue a <code>ramp //PROJECT/NET_ID/GROUP_ID</code> to the C-Gate server.
-     * 
+     *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.100</i></a>
      * @param level
@@ -172,5 +175,19 @@ public class Group extends CGateObject
     public Response ramp(int level, int seconds) throws CGateException
     {
         return getCGateSession().sendCommand("ramp " + getAddress() + " " + level + " " + seconds + "s");
+    }
+
+    /**
+     * Issue a <code>get //PROJECT/NET_ID/GROUP_ID Level</code> to the C-Gate server.
+     *
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.44</i></a>
+     * @throws CGateException
+     */
+    public int getLevel() throws CGateException
+    {
+        ArrayList<String> resp_array = getCGateSession().sendCommand("get " + getAddress() + " Level").toArray();
+        String level_str = responseToMap(resp_array.get(0)).get("Level");
+        return Integer.valueOf(level_str);
     }
 }

@@ -128,6 +128,10 @@ public final class Network extends CGateObject
      */
     public Application getApplication(int application_id) throws CGateException
     {
+        Application application = (Application)getCachedObject("application", String.valueOf(application_id));
+        if (application != null)
+            return application;
+
         getApplications();
 
         return (Application)getCachedObject("application", String.valueOf(application_id));
@@ -142,6 +146,10 @@ public final class Network extends CGateObject
      */
     public Unit getUnit(int unit_id) throws CGateException
     {
+        Unit unit = (Unit)getCachedObject("unit", String.valueOf(unit_id));
+        if (unit != null)
+            return unit;
+
         getUnits();
 
         return (Unit)getCachedObject("unit", String.valueOf(unit_id));

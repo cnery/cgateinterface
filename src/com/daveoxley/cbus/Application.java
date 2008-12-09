@@ -20,6 +20,9 @@
 package com.daveoxley.cbus;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
@@ -126,6 +129,21 @@ public class Application extends CGateObject
 
     public ArrayList<Group> getGroups() throws CGateException
     {
+        ArrayList<Group> groups = new ArrayList<Group>();
+
+        Collection<CGateObject> cachedGroups = getAllCachedObjects("group");
+        if (cachedGroups != null && !cachedGroups.isEmpty()) {
+            for (CGateObject group : cachedGroups)
+                groups.add((Group)group);
+            Collections.sort(groups, new Comparator<Group>() {
+
+                public int compare(Group o1, Group o2) {
+                    return (o1.getGroupID()<o2.getGroupID() ? -1 : (o1.getGroupID()==o2.getGroupID() ? 0 : 1));
+                }
+            });
+            return groups;
+        }
+
         network.tree();
 
         Response resp = dbget(null);
@@ -141,7 +159,6 @@ public class Application extends CGateObject
             }
         }
 
-        ArrayList<Group> groups = new ArrayList<Group>();
         for (int i = 1; i <= number_of_groups; i++) {
             ArrayList<String> resp_array = dbget("Group[" + i + "]/Address").toArray();
             Group group = Group.getOrCreateGroup(getCGateSession(), this, resp_array.get(0));
@@ -161,6 +178,10 @@ public class Application extends CGateObject
      */
     public Group getGroup(int group_id) throws CGateException
     {
+        Group group = (Group)getCachedObject("group", String.valueOf(group_id));
+        if (group != null)
+            return group;
+
         getGroups();
 
         return (Group)getCachedObject("group", String.valueOf(group_id));

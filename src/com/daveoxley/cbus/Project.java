@@ -148,6 +148,10 @@ public final class Project extends CGateObject
      */
     public static Project getProject(CGateSession cgate_session, String project_name) throws CGateException
     {
+        Project project = (Project)cgate_session.getCachedObject("project", project_name);
+        if (project != null)
+            return project;
+
         dir(cgate_session);
 
         return (Project)cgate_session.getCachedObject("project", project_name);
@@ -162,6 +166,10 @@ public final class Project extends CGateObject
      */
     public Network getNetwork(int network_id) throws CGateException
     {
+        Network network = (Network)getCachedObject("network", String.valueOf(network_id));
+        if (network != null)
+            return network;
+
         Network.listAll(getCGateSession());
 
         return (Network)getCachedObject("network", String.valueOf(network_id));
