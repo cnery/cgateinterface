@@ -1,0 +1,15 @@
+CGateInterface 0.2 (released TBC)
+
+* 
+
+CGateInterface 0.1 (released 9/12/08)
+
+* Implement object model for C-Gate projects, networks, units, applications
+  and groups.
+* Implement merge of information from C-Gate database and network tree into
+  object model.
+* Implement caching of object model.
+* Implement C-Gate event and C-Gate status callback API's with thread pooling.
+* Implement connection to C-Gate command port.
+* Implement ping and validate of C-Gate connection.
+* Implement multi-threaded processing of C-Gate command results.
