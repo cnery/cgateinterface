@@ -84,12 +84,16 @@ public final class Project extends CGateObject
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.89</i></a>
      * @param cgate_session The C-Gate session
+     * @param cached_objects Return cached Project objects or rebuild list from C-Gate
      * @return ArrayList of Projects
      * @throws CGateException
      */
-    public static ArrayList<Project> dir(CGateSession cgate_session) throws CGateException
+    public static ArrayList<Project> dir(CGateSession cgate_session, boolean cached_objects) throws CGateException
     {
         Response resp = cgate_session.sendCommand("project dir");
+
+        if (!cached_objects)
+            cgate_session.clearCache("project");
 
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp)
@@ -104,12 +108,16 @@ public final class Project extends CGateObject
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.90</i></a>
      * @param cgate_session The C-Gate session
+     * @param cached_objects Return cached Project objects or rebuild list from C-Gate
      * @return ArrayList of Projects
      * @throws CGateException
      */
-    public static ArrayList<Project> list(CGateSession cgate_session) throws CGateException
+    public static ArrayList<Project> list(CGateSession cgate_session, boolean cached_objects) throws CGateException
     {
         Response resp = cgate_session.sendCommand("project list");
+
+        if (!cached_objects)
+            cgate_session.clearCache("project");
 
         ArrayList<Project> projects = new ArrayList<Project>();
         for (String response : resp)
@@ -152,7 +160,7 @@ public final class Project extends CGateObject
         if (project != null)
             return project;
 
-        dir(cgate_session);
+        dir(cgate_session, false);
 
         return (Project)cgate_session.getCachedObject("project", project_name);
     }
@@ -170,7 +178,7 @@ public final class Project extends CGateObject
         if (network != null)
             return network;
 
-        Network.listAll(getCGateSession());
+        Network.listAll(getCGateSession(), true);
 
         return (Network)getCachedObject("network", String.valueOf(network_id));
     }
@@ -178,12 +186,13 @@ public final class Project extends CGateObject
     /**
      * Get all Network objects for this Project.
      * 
+     * @param cached_objects Return cached Project objects or rebuild list from C-Gate
      * @return ArrayList of Networks
      * @throws CGateException
      */
-    public ArrayList<Network> getNetworks() throws CGateException
+    public ArrayList<Network> getNetworks(boolean cached_objects) throws CGateException
     {
-        Network.listAll(getCGateSession());
+        Network.listAll(getCGateSession(), cached_objects);
 
         ArrayList<Network> networks = new ArrayList<Network>();
         for (CGateObject network : getAllCachedObjects("network"))

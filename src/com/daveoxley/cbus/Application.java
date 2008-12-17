@@ -127,8 +127,11 @@ public class Application extends CGateObject
         return getCGateSession().sendCommand("dbget " + getAddress() + (param_name == null ? "" : ("/" + param_name)));
     }
 
-    public ArrayList<Group> getGroups() throws CGateException
+    public ArrayList<Group> getGroups(boolean cached_objects) throws CGateException
     {
+        if (!cached_objects)
+            clearCache("group");
+
         ArrayList<Group> groups = new ArrayList<Group>();
 
         Collection<CGateObject> cachedGroups = getAllCachedObjects("group");
@@ -182,7 +185,7 @@ public class Application extends CGateObject
         if (group != null)
             return group;
 
-        getGroups();
+        getGroups(false);
 
         return (Group)getCachedObject("group", String.valueOf(group_id));
     }

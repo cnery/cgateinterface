@@ -478,7 +478,7 @@ public class CGateSession extends CGateObject
         protected void doRun() throws IOException
         {
             final String event = getInputReader().readLine();
-            if(event.length() >= 19)
+            if(event != null && event.length() >= 19)
             {
                 final int event_code = Integer.parseInt(event.substring(16, 19).trim());
                 for (final EventCallback event_callback : event_callbacks)

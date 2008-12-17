@@ -20,7 +20,9 @@
 package com.daveoxley.cbus;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -77,7 +79,7 @@ public abstract class CGateObject
 
     protected abstract String getKey();
 
-    private final HashMap<String,HashMap<String,CGateObject>> subtree_cache = new HashMap<String,HashMap<String,CGateObject>>();
+    private final HashMap<String,Map<String,CGateObject>> subtree_cache = new HashMap<String,Map<String,CGateObject>>();
 
     public abstract CGateObject getCGateObject(String address) throws CGateException;
 
@@ -85,7 +87,7 @@ public abstract class CGateObject
 
     protected void setupSubtreeCache(String cache_key)
     {
-        subtree_cache.put(cache_key, new HashMap<String,CGateObject>());
+        subtree_cache.put(cache_key, Collections.synchronizedMap(new HashMap<String,CGateObject>()));
     }
 
     protected CGateObject cacheObject(String cache_key, CGateObject cgate_obj)
@@ -108,9 +110,14 @@ public abstract class CGateObject
         return subtree_cache.get(cache_key).values();
     }
 
+    protected void clearCache(String cache_key)
+    {
+        subtree_cache.get(cache_key).clear();
+    }
+
     protected void clearCache()
     {
-        for (HashMap<String,CGateObject> map: subtree_cache.values())
+        for (Map<String,CGateObject> map: subtree_cache.values())
             map.clear();
     }
 }

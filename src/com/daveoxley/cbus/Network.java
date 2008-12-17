@@ -105,12 +105,19 @@ public final class Network extends CGateObject
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
      *      <i>C-Gate Server Guide 4.3.63</i></a>
      * @param cgate_session The C-Gate session
+     * @param cached_objects Return cached Project objects or rebuild list from C-Gate
      * @return ArrayList of Networks
      * @throws CGateException
      */
-    public static ArrayList<Network> listAll(CGateSession cgate_session) throws CGateException
+    public static ArrayList<Network> listAll(CGateSession cgate_session, boolean cached_objects) throws CGateException
     {
         Response resp = cgate_session.sendCommand("net list_all");
+
+        if (!cached_objects)
+        {
+            for (Project project : Project.dir(cgate_session, false))
+                project.clearCache("network");
+        }
 
         ArrayList<Network> networks = new ArrayList<Network>();
         for (String response : resp)
@@ -132,7 +139,7 @@ public final class Network extends CGateObject
         if (application != null)
             return application;
 
-        getApplications();
+        getApplications(false);
 
         return (Application)getCachedObject("application", String.valueOf(application_id));
     }
@@ -150,7 +157,7 @@ public final class Network extends CGateObject
         if (unit != null)
             return unit;
 
-        getUnits();
+        getUnits(false);
 
         return (Unit)getCachedObject("unit", String.valueOf(unit_id));
     }
@@ -159,7 +166,7 @@ public final class Network extends CGateObject
     {
         HashMap<String,String> resp_map = responseToMap(cgate_response);
 
-        Project.dir(cgate_session);
+        Project.dir(cgate_session, true);
         Project project = Project.getProject(cgate_session, resp_map.get("project"));
 
         int net_id = getNetworkID(project, cgate_response);
@@ -243,8 +250,11 @@ public final class Network extends CGateObject
         return response.substring(index + network_address.length(), application_index);
     }
 
-    public ArrayList<Unit> getUnits() throws CGateException
+    public ArrayList<Unit> getUnits(boolean cached_objects) throws CGateException
     {
+        if (!cached_objects)
+            clearCache("unit");
+
         tree();
 
         Response resp = dbget(null);
@@ -281,7 +291,7 @@ public final class Network extends CGateObject
     void tree() throws CGateException
     {
         CGateSession cgate_session = getCGateSession();
-        getApplications();
+        getApplications(true);
         Response resp = cgate_session.sendCommand("tree " + getAddress());
 
         for (String response : resp)
@@ -317,12 +327,16 @@ public final class Network extends CGateObject
      * Get all Application objects for this Network.
      * 
      * @return ArrayList of Applications
+     * @param cached_objects Return cached Project objects or rebuild list from C-Gate
      * @throws CGateException
      */
-    public ArrayList<Application> getApplications() throws CGateException
+    public ArrayList<Application> getApplications(boolean cached_objects) throws CGateException
     {
         CGateSession cgate_session = getCGateSession();
         Response resp = dbget(null);
+
+        if (!cached_objects)
+            clearCache("application");
 
         int number_of_applications = -1;
         for (String response : resp)
