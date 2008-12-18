@@ -188,6 +188,6 @@ public class Group extends CGateObject
     {
         ArrayList<String> resp_array = getCGateSession().sendCommand("get " + getAddress() + " Level").toArray();
         String level_str = responseToMap(resp_array.get(0)).get("Level");
-        return Integer.valueOf(level_str);
+        return level_str == null ? 0 : Integer.valueOf(level_str);
     }
 }
