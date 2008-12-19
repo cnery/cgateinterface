@@ -212,7 +212,7 @@ public final class Network extends CGateObject
         return net_id;
     }
 
-    String getProjectName()
+    public String getProjectName()
     {
         return project.getName();
     }
