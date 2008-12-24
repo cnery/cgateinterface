@@ -178,6 +178,19 @@ public class Group extends CGateObject
     }
 
     /**
+     * Issue a <code>terminate_ramp //PROJECT/NET_ID/GROUP_ID</code> to the C-Gate server.
+     *
+     * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
+     *      <i>C-Gate Server Guide 4.3.123</i></a>
+     * @param force
+     * @throws CGateException
+     */
+    public Response terminateRamp(boolean force) throws CGateException
+    {
+        return getCGateSession().sendCommand("terminate_ramp " + getAddress() + (force ? " force" : ""));
+    }
+
+    /**
      * Issue a <code>get //PROJECT/NET_ID/GROUP_ID Level</code> to the C-Gate server.
      *
      * @see <a href="http://www.clipsal.com/cis/downloads/Toolkit/CGateServerGuide_1_0.pdf">
