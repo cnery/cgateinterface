@@ -1,3 +1,7 @@
+CGateInterface 0.3.0 (released TBC)
+
+
+
 CGateInterface 0.2.0 (released 29/12/08)
 
 * Allow debug callbacks to be turned on and off during lifetime of session.
