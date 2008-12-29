@@ -32,15 +32,10 @@ public class DebugEventCallback extends EventCallback
 {
     private final static Log log = LogFactory.getLog(DebugEventCallback.class);
 
-    public static boolean isDebugEnabled()
-    {
-        return log.isDebugEnabled();
-    }
-
     @Override
     public boolean acceptEvent(int event_code)
     {
-        return true; // Accept all events
+        return log.isDebugEnabled(); // Accept all events if debug enabled
     }
 
     @Override

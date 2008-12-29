@@ -73,10 +73,8 @@ public class CGateSession extends CGateObject
             command_connection = new CommandConnection(cgate_server, command_port);
             event_connection = new EventConnection(cgate_server, event_port);
             status_change_connection = new StatusChangeConnection(cgate_server, status_change_port);
-            if (DebugEventCallback.isDebugEnabled())
-                registerEventCallback(new DebugEventCallback());
-            if (DebugStatusChangeCallback.isDebugEnabled())
-                registerStatusChangeCallback(new DebugStatusChangeCallback());
+            registerEventCallback(new DebugEventCallback());
+            registerStatusChangeCallback(new DebugStatusChangeCallback());
             connected = true;
             ping_connections = new PingConnections();
         }
@@ -563,19 +561,22 @@ public class CGateSession extends CGateObject
                     if (!continueRunning())
                         return;
 
-                    try
+                    if (sc_callback.isActive())
                     {
-                        ThreadImpl callback_thread = (ThreadImpl)sc_callback_pool.borrowObject();
-                        callback_thread.execute(new Runnable() {
-                            public void run()
-                            {
-                                sc_callback.processStatusChange(CGateSession.this, status_change);
-                            }
-                        });
-                    }
-                    catch (Exception e)
-                    {
-                        new CGateException(e);
+                        try
+                        {
+                            ThreadImpl callback_thread = (ThreadImpl)sc_callback_pool.borrowObject();
+                            callback_thread.execute(new Runnable() {
+                                public void run()
+                                {
+                                    sc_callback.processStatusChange(CGateSession.this, status_change);
+                                }
+                            });
+                        }
+                        catch (Exception e)
+                        {
+                            new CGateException(e);
+                        }
                     }
                 }
             }

@@ -29,6 +29,12 @@ public abstract class StatusChangeCallback {
 
     /**
      *
+     * @return true if callback is active
+     */
+    public abstract boolean isActive();
+
+    /**
+     *
      * @param cgate_session
      * @param status_change
      */

@@ -1,5 +1,6 @@
 CGateInterface 0.2 (released TBC)
 
+* Allow debug callbacks to be turned on and off during lifetime of session.
 * Implement terminate_ramp.
 * Fix NullPointerException when a Group returns a null level.
 * Change API's to rebuild cache rather than always retrieve from the cache.

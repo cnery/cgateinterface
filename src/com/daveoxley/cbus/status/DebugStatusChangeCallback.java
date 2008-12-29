@@ -31,7 +31,7 @@ public class DebugStatusChangeCallback extends StatusChangeCallback
 {
     private final static Log log = LogFactory.getLog(DebugStatusChangeCallback.class);
 
-    public static boolean isDebugEnabled()
+    public boolean isActive()
     {
         return log.isDebugEnabled();
     }
