@@ -26,7 +26,7 @@ import java.util.HashMap;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public final class Project extends CGateObject
+public final class Project extends CGateObject implements Comparable<Project>
 {
     private String project_name;
 
@@ -75,6 +75,11 @@ public final class Project extends CGateObject
     public String getAddress()
     {
         return "//" + getName();
+    }
+
+    @Override
+    public int compareTo(Project o) {
+        return project_name.compareTo(project_name);
     }
 
     /**

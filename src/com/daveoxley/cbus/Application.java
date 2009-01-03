@@ -28,7 +28,7 @@ import java.util.Comparator;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class Application extends CGateObject
+public class Application extends CGateObject implements Comparable<Application>
 {
     private Network network;
 
@@ -74,6 +74,14 @@ public class Application extends CGateObject
     public String getAddress()
     {
         return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getApplicationID();
+    }
+
+    @Override
+    public int compareTo(Application o) {
+        int cmp = network.compareTo(o.network);
+        if (cmp != 0)
+            return cmp;
+	return (getApplicationID()<o.getApplicationID() ? -1 : (getApplicationID()==o.getApplicationID() ? 0 : 1));
     }
 
     static Application getOrCreateApplication(CGateSession cgate_session, Network network, String response)

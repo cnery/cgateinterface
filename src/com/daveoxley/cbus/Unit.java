@@ -25,7 +25,7 @@ import java.util.ArrayList;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class Unit extends CGateObject
+public class Unit extends CGateObject implements Comparable<Unit>
 {
     private Network network;
 
@@ -63,6 +63,14 @@ public class Unit extends CGateObject
     public String getAddress()
     {
         return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/p/" + getUnitID();
+    }
+
+    @Override
+    public int compareTo(Unit o) {
+        int cmp = network.compareTo(o.network);
+        if (cmp != 0)
+            return cmp;
+	return (getUnitID()<o.getUnitID() ? -1 : (getUnitID()==o.getUnitID() ? 0 : 1));
     }
 
     static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response, boolean tree_resp) throws CGateException

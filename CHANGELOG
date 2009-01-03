@@ -1,6 +1,6 @@
 CGateInterface 0.3.0 (released TBC)
 
-
+* Make most CGateObjects Comparable.
 
 CGateInterface 0.2.0 (released 29/12/08)
 

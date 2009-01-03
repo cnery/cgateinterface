@@ -25,7 +25,7 @@ import java.util.ArrayList;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public class Group extends CGateObject
+public class Group extends CGateObject implements Comparable<Group>
 {
     private Application application;
 
@@ -64,6 +64,14 @@ public class Group extends CGateObject
     {
         return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
                 "/" + application.getApplicationID() + "/" + getGroupID();
+    }
+
+    @Override
+    public int compareTo(Group o) {
+        int cmp = application.compareTo(o.application);
+        if (cmp != 0)
+            return cmp;
+	return (getGroupID()<o.getGroupID() ? -1 : (getGroupID()==o.getGroupID() ? 0 : 1));
     }
 
     static Group getOrCreateGroup(CGateSession cgate_session, Network network, String response) throws CGateException

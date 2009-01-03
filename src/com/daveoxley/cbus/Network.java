@@ -26,7 +26,7 @@ import java.util.HashMap;
  *
  * @author Dave Oxley <dave@daveoxley.co.uk>
  */
-public final class Network extends CGateObject
+public final class Network extends CGateObject implements Comparable<Network>
 {
     private Project project;
 
@@ -97,6 +97,14 @@ public final class Network extends CGateObject
     public String getAddress()
     {
         return "//" + getProjectName() + "/" + getNetworkID();
+    }
+
+    @Override
+    public int compareTo(Network o) {
+        int cmp = project.compareTo(o.project);
+        if (cmp != 0)
+            return cmp;
+	return (getNetworkID()<o.getNetworkID() ? -1 : (getNetworkID()==o.getNetworkID() ? 0 : 1));
     }
 
     /**
