@@ -60,12 +60,13 @@ public class CGateInterfaceTest {
 
         try
         {
-            CGateSession result = CGateInterface.connect(null, 0, 0);
+            CGateSession result = CGateInterface.connect(null, 0, 0, 0);
             fail("NullPointerException should have been thrown");
         }
         catch (NullPointerException npe) {}
 
-        CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT, CGateConfig.EVENT_PORT);
+        CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
+                CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
         assertNotNull(session);
         session.close();
     }
@@ -84,7 +85,8 @@ public class CGateInterfaceTest {
         }
         catch (NullPointerException npe) {}
 
-        CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT, CGateConfig.EVENT_PORT);
+        CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
+                CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
         CGateInterface.noop(session);
         session.close();
     }

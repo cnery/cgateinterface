@@ -47,7 +47,8 @@ public class UnitTest {
 
     @Before
     public void setUp() throws CGateConnectException {
-        session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT, CGateConfig.EVENT_PORT);
+        session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
+                CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
     }
 
     @After

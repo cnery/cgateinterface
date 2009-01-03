@@ -32,6 +32,7 @@ class CGateConfig
     static final String SERVER_STR = "blackadder";
     static final int COMMAND_PORT = 20023;
     static final int EVENT_PORT = 20024;
+    static final int STATUS_CHANGE_PORT = 20025;
     /** ---------------------------------------- */
 
 

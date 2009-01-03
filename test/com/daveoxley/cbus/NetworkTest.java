@@ -48,7 +48,8 @@ public class NetworkTest {
 
     @Before
     public void setUp() throws CGateConnectException {
-        session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT, CGateConfig.EVENT_PORT);
+        session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
+                CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
     }
 
     @After
@@ -63,7 +64,7 @@ public class NetworkTest {
     public void testListAll() throws Exception {
         System.out.println("listAll");
 
-        ArrayList<Network> result = Network.listAll(session);
+        ArrayList<Network> result = Network.listAll(session, false);
 
         assertNotNull(result);
     }
@@ -75,7 +76,7 @@ public class NetworkTest {
     public void testGetNetworkID() throws CGateException {
         System.out.println("getNetworkID");
 
-        ArrayList<Network> result = Network.listAll(session);
+        ArrayList<Network> result = Network.listAll(session, false);
         assertEquals(254, result.get(0).getNetworkID());
     }
 
@@ -87,6 +88,6 @@ public class NetworkTest {
         System.out.println("listApplications");
 
         Network network = Project.getProject(session, "OXLEY").getNetwork(254);
-        network.getApplications();
+        network.getApplications(false);
     }
 }

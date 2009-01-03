@@ -1,5 +1,6 @@
 CGateInterface 0.3.0 (released TBC)
 
+* Fix unit tests.
 * Add 2009 to copyright notices.
 * Make most CGateObjects Comparable.
 

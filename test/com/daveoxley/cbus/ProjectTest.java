@@ -48,7 +48,8 @@ public class ProjectTest {
 
     @Before
     public void setUp() throws CGateConnectException {
-        session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT, CGateConfig.EVENT_PORT);
+        session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
+                CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
     }
 
     @After
@@ -63,7 +64,7 @@ public class ProjectTest {
     public void testDir() throws Exception {
         System.out.println("dir");
 
-        ArrayList<Project> result = Project.dir(session);
+        ArrayList<Project> result = Project.dir(session, false);
 
         assertNotNull(result);
     }
@@ -75,10 +76,10 @@ public class ProjectTest {
     public void testGetName() throws Exception {
         System.out.println("getName");
 
-        ArrayList<Project> result = Project.dir(session);
+        ArrayList<Project> result = Project.dir(session, false);
         assertEquals("OXLEY", result.get(0).getName());
 
-        result = Project.list(session);
+        result = Project.list(session, false);
         assertEquals("OXLEY", result.get(0).getName());
    }
 
