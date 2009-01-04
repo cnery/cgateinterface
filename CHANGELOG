@@ -1,5 +1,7 @@
 CGateInterface 0.3.0 (released TBC)
 
+* Fix race condition that caused NullPointerException and implement
+  isBorrowed in ThreadImpl.
 * Fix unit tests.
 * Add 2009 to copyright notices.
 * Make most CGateObjects Comparable.

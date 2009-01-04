@@ -29,11 +29,11 @@ public class ThreadImpl extends Thread
 {
     private boolean used = false;
 
-    private boolean running = false;
+    private volatile boolean running = false;
 
     private Runnable runnable = null;
 
-    private volatile ThreadImplPool pool = null;
+    private ThreadImplPool pool = null;
 
     @Override
     public synchronized void start()
@@ -53,9 +53,9 @@ public class ThreadImpl extends Thread
         notifyAll();
     }
 
-    boolean isBorrowed()
+    synchronized boolean isBorrowed()
     {
-        return false; // To be implemented
+        return pool != null;
     }
 
     boolean isRunning()
@@ -63,7 +63,7 @@ public class ThreadImpl extends Thread
         return running;
     }
 
-    void setPool(ThreadImplPool pool)
+    synchronized void setPool(ThreadImplPool pool)
     {
         this.pool = pool;
     }
