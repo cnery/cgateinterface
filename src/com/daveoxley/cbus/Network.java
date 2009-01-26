@@ -123,7 +123,7 @@ public final class Network extends CGateObject implements Comparable<Network>
 
         if (!cached_objects)
         {
-            for (Project project : Project.dir(cgate_session, false))
+            for (Project project : Project.dir(cgate_session, true))
                 project.clearCache("network");
         }
 

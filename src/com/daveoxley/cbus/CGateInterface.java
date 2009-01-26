@@ -66,9 +66,8 @@ public final class CGateInterface extends CGateObject
      * @param event_port The event port for the C-Gate server
      * @param status_change_port The status change port for the C-Gate server
      * @return CGateSession The C-Gate session
-     * @throws com.daveoxley.cbus.CGateConnectException
      */
-    public static CGateSession connect(InetAddress cgate_server, int command_port, int event_port, int status_change_port) throws CGateConnectException
+    public static CGateSession connect(InetAddress cgate_server, int command_port, int event_port, int status_change_port)
     {
         return new CGateSession(cgate_server, command_port, event_port, status_change_port);
     }

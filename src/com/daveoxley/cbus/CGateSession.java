@@ -65,28 +65,16 @@ public class CGateSession extends CGateObject
 
     private boolean connected = false;
 
-    CGateSession(InetAddress cgate_server, int command_port, int event_port, int status_change_port) throws CGateConnectException
+    CGateSession(InetAddress cgate_server, int command_port, int event_port, int status_change_port)
     {
         super(null);
         setupSubtreeCache("project");
-        try {
-            command_connection = new CommandConnection(cgate_server, command_port);
-            event_connection = new EventConnection(cgate_server, event_port);
-            status_change_connection = new StatusChangeConnection(cgate_server, status_change_port);
-            registerEventCallback(new DebugEventCallback());
-            registerStatusChangeCallback(new DebugStatusChangeCallback());
-            connected = true;
-            ping_connections = new PingConnections();
-        }
-        catch (CGateConnectException e)
-        {
-            try
-            {
-                close();
-            }
-            catch (Exception e2) {}
-            throw e;
-        }
+        command_connection = new CommandConnection(cgate_server, command_port);
+        event_connection = new EventConnection(cgate_server, event_port);
+        status_change_connection = new StatusChangeConnection(cgate_server, status_change_port);
+        registerEventCallback(new DebugEventCallback());
+        registerStatusChangeCallback(new DebugStatusChangeCallback());
+        ping_connections = new PingConnections();
     }
 
     @Override
@@ -129,6 +117,30 @@ public class CGateSession extends CGateObject
         throw new UnsupportedOperationException();
     }
 
+    public void connect() throws CGateConnectException
+    {
+        if (connected)
+            return;
+
+        try
+        {
+            command_connection.start();
+            event_connection.start();
+            status_change_connection.start();
+            connected = true;
+            ping_connections.start();
+        }
+        catch (CGateConnectException e)
+        {
+            try
+            {
+                close();
+            }
+            catch (Exception e2) {}
+            throw e;
+        }
+    }
+
     /**
      * Issue a <code>quit</code> to the C-Gate server and close the input and output stream
      * and the command_socket.
@@ -139,6 +151,9 @@ public class CGateSession extends CGateObject
      */
     public void close() throws CGateException
     {
+        if (!connected)
+            return;
+
         synchronized (ping_connections)
         {
             try
@@ -151,6 +166,7 @@ public class CGateSession extends CGateObject
             {
                 command_connection.stop();
                 event_connection.stop();
+                status_change_connection.stop();
             }
             catch (Exception e)
             {
@@ -214,12 +230,11 @@ public class CGateSession extends CGateObject
 
         private PrintWriter output_stream;
 
-        protected CGateConnection(InetAddress server, int port, boolean create_output) throws CGateConnectException
+        protected CGateConnection(InetAddress server, int port, boolean create_output)
         {
             this.server = server;
             this.port = port;
             this.create_output = create_output;
-            start();
         }
 
         protected synchronized void start() throws CGateConnectException
@@ -337,9 +352,13 @@ public class CGateSession extends CGateObject
 
     private class PingConnections implements Runnable
     {
-        private final Thread thread;
+        private Thread thread;
 
         private PingConnections()
+        {
+        }
+
+        protected void start()
         {
             thread = new Thread(this);
             thread.setDaemon(true);
@@ -387,7 +406,7 @@ public class CGateSession extends CGateObject
     {
         private int next_id = 0;
 
-        private CommandConnection(InetAddress server, int port) throws CGateConnectException
+        private CommandConnection(InetAddress server, int port)
         {
             super(server, port, true);
         }
@@ -441,7 +460,7 @@ public class CGateSession extends CGateObject
      *
      * @param event_callback
      */
-    public void registerEventCallback(EventCallback event_callback) throws CGateConnectException
+    public void registerEventCallback(EventCallback event_callback)
     {
         event_connection.registerEventCallback(event_callback);
     }
@@ -452,7 +471,7 @@ public class CGateSession extends CGateObject
 
         private final List<EventCallback> event_callbacks = Collections.synchronizedList(new ArrayList<EventCallback>());
 
-        private EventConnection(InetAddress server, int port) throws CGateConnectException
+        private EventConnection(InetAddress server, int port)
         {
             super(server, port, false);
             Config config = new Config();
@@ -466,10 +485,9 @@ public class CGateSession extends CGateObject
             event_callback_pool = new ThreadImplPool(config);
         }
 
-        private void registerEventCallback(EventCallback event_callback) throws CGateConnectException
+        private void registerEventCallback(EventCallback event_callback)
         {
             event_callbacks.add(event_callback);
-            start();
         }
 
         @Override
@@ -519,7 +537,7 @@ public class CGateSession extends CGateObject
      *
      * @param event_callback
      */
-    public void registerStatusChangeCallback(StatusChangeCallback status_change_callback) throws CGateConnectException
+    public void registerStatusChangeCallback(StatusChangeCallback status_change_callback)
     {
         status_change_connection.registerStatusChangeCallback(status_change_callback);
     }
@@ -530,7 +548,7 @@ public class CGateSession extends CGateObject
 
         private final List<StatusChangeCallback> sc_callbacks = Collections.synchronizedList(new ArrayList<StatusChangeCallback>());
 
-        private StatusChangeConnection(InetAddress server, int port) throws CGateConnectException
+        private StatusChangeConnection(InetAddress server, int port)
         {
             super(server, port, false);
             Config config = new Config();
@@ -544,10 +562,9 @@ public class CGateSession extends CGateObject
             sc_callback_pool = new ThreadImplPool(config);
         }
 
-        private void registerStatusChangeCallback(StatusChangeCallback event_callback) throws CGateConnectException
+        private void registerStatusChangeCallback(StatusChangeCallback event_callback)
         {
             sc_callbacks.add(event_callback);
-            start();
         }
 
         @Override
