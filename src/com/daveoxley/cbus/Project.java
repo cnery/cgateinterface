@@ -183,6 +183,7 @@ public final class Project extends CGateObject implements Comparable<Project>
         if (network != null)
             return network;
 
+        load();
         Network.listAll(getCGateSession(), true);
 
         return (Network)getCachedObject("network", String.valueOf(network_id));

@@ -135,7 +135,7 @@ public class Group extends CGateObject implements Comparable<Group>
      *
      * @return
      */
-    private Network getNetwork()
+    public Network getNetwork()
     {
         return application.getNetwork();
     }
