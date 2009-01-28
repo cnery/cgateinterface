@@ -66,7 +66,11 @@ public final class Project extends CGateObject implements Comparable<Project>
         int network_id = Integer.parseInt(address.substring(0, next_part_index));
         Network network = getNetwork(network_id);
         if (return_next)
+        {
+            if (network == null)
+                throw new IllegalArgumentException("No network found: " + address);
             return network;
+        }
 
         return network.getCGateObject(address.substring(next_part_index + 1));
     }

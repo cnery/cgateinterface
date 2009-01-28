@@ -129,7 +129,7 @@ public class Unit extends CGateObject implements Comparable<Unit>
      *
      * @return
      */
-    private Network getNetwork()
+    public Network getNetwork()
     {
         return network;
     }

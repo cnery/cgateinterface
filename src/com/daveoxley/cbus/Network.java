@@ -78,7 +78,11 @@ public final class Network extends CGateObject implements Comparable<Network>
             int unit_id = Integer.parseInt(next_part);
             Unit unit = getUnit(unit_id);
             if (return_next)
+            {
+                if (unit == null)
+                    throw new IllegalArgumentException("No unit found: " + address);
                 return unit;
+            }
 
             return unit.getCGateObject(address.substring(next_part_index + 1));
         }
@@ -87,7 +91,11 @@ public final class Network extends CGateObject implements Comparable<Network>
             int application_id = Integer.parseInt(next_part);
             Application application = getApplication(application_id);
             if (return_next)
+            {
+                if (application == null)
+                    throw new IllegalArgumentException("No application found: " + address);
                 return application;
+            }
 
             return application.getCGateObject(address.substring(next_part_index + 1));
         }
@@ -218,6 +226,11 @@ public final class Network extends CGateObject implements Comparable<Network>
     public int getNetworkID()
     {
         return net_id;
+    }
+
+    public Project getProject()
+    {
+        return project;
     }
 
     public String getProjectName()
