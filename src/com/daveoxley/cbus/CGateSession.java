@@ -105,12 +105,11 @@ public class CGateSession extends CGateObject
 
         String project_name = address.substring(2, next_part_index);
         Project project = Project.getProject(this, project_name);
+        if (project == null)
+            throw new IllegalArgumentException("No project found: " + address);
+
         if (return_next)
-        {
-            if (project == null)
-                throw new IllegalArgumentException("No project found: " + address);
             return project;
-        }
 
         return project.getCGateObject(address.substring(next_part_index + 1));
     }

@@ -64,12 +64,11 @@ public class Application extends CGateObject implements Comparable<Application>
 
         int group_id = Integer.parseInt(address.substring(0, next_part_index));
         Group group = getGroup(group_id);
+        if (group == null)
+            throw new IllegalArgumentException("No group found: " + address);
+
         if (return_next)
-        {
-            if (group == null)
-                throw new IllegalArgumentException("No group found: " + address);
             return group;
-        }
 
         return group.getCGateObject(address.substring(next_part_index + 1));
     }
