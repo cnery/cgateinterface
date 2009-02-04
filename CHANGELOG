@@ -1,4 +1,4 @@
-CGateInterface 0.3.0 (released TBC)
+CGateInterface 0.3.0 (released 4/2/09)
 
 * Additional public API's to get parents of CGateObjects.
 * Fix race condition that caused NullPointerException and implement
