@@ -23,8 +23,10 @@ import com.daveoxley.cbus.events.DebugEventCallback;
 import com.daveoxley.cbus.events.EventCallback;
 import com.daveoxley.cbus.status.DebugStatusChangeCallback;
 import com.daveoxley.cbus.status.StatusChangeCallback;
-import com.daveoxley.cbus.threadpool.ThreadImpl;
-import com.daveoxley.cbus.threadpool.ThreadImplPool;
+import com.workplacesystems.utilsj.threadpool.ThreadObjectFactory;
+import com.workplacesystems.utilsj.threadpool.ThreadPool;
+import com.workplacesystems.utilsj.threadpool.ThreadPoolCreator;
+import com.workplacesystems.utilsj.threadpool.WorkerThread;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -470,22 +472,52 @@ public class CGateSession extends CGateObject
 
     private class EventConnection extends CGateConnection
     {
-        private final ThreadImplPool event_callback_pool;
+        private final ThreadPool event_callback_pool;
 
         private final List<EventCallback> event_callbacks = Collections.synchronizedList(new ArrayList<EventCallback>());
 
         private EventConnection(InetAddress server, int port)
         {
             super(server, port, false);
-            Config config = new Config();
-            config.maxActive = 10;
-            config.minIdle   = 2;
-            config.maxIdle   = 5;
-            config.testOnBorrow = false;
-            config.testOnReturn = true;
-            config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
-            config.maxWait = -1;
-            event_callback_pool = new ThreadImplPool(config);
+            ThreadPoolCreator tp_creator = new ThreadPoolCreator() {
+
+                public ThreadObjectFactory getThreadObjectFactory() {
+                    return new ThreadObjectFactory() {
+                        @Override
+                        public void initialiseThread(Thread thread)
+                        {
+                            thread.setName("Event");
+                        }
+
+                        @Override
+                        public void activateThread(Thread thread)
+                        {
+                        }
+
+                        @Override
+                        public void passivateThread(Thread thread)
+                        {
+                        }
+                    };
+                }
+
+                public Config getThreadPoolConfig() {
+                    Config config = new Config();
+                    config.maxActive = 10;
+                    config.minIdle   = 2;
+                    config.maxIdle   = 5;
+                    config.testOnBorrow = false;
+                    config.testOnReturn = true;
+                    config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
+                    config.maxWait = -1;
+                    return config;
+                }
+
+                public String getThreadPoolName() {
+                    return "EventPool";
+                }
+            };
+            event_callback_pool = new ThreadPool(tp_creator.getThreadObjectFactory(), tp_creator.getThreadPoolConfig());
         }
 
         private void registerEventCallback(EventCallback event_callback)
@@ -509,7 +541,7 @@ public class CGateSession extends CGateObject
                     {
                         if (event_callback.acceptEvent(event_code))
                         {
-                            ThreadImpl callback_thread = (ThreadImpl)event_callback_pool.borrowObject();
+                            WorkerThread callback_thread = (WorkerThread)event_callback_pool.borrowObject();
                             callback_thread.execute(new Runnable() {
                                 public void run()
                                 {
@@ -524,7 +556,7 @@ public class CGateSession extends CGateObject
                                     event_callback.processEvent(CGateSession.this, event_code,
                                             event_time, event.length() == 19 ? null : event.substring(19));
                                 }
-                            });
+                            }, null);
                         }
                     }
                     catch (Exception e)
@@ -547,22 +579,52 @@ public class CGateSession extends CGateObject
 
     private class StatusChangeConnection extends CGateConnection
     {
-        private final ThreadImplPool sc_callback_pool;
+        private final ThreadPool sc_callback_pool;
 
         private final List<StatusChangeCallback> sc_callbacks = Collections.synchronizedList(new ArrayList<StatusChangeCallback>());
 
         private StatusChangeConnection(InetAddress server, int port)
         {
             super(server, port, false);
-            Config config = new Config();
-            config.maxActive = 10;
-            config.minIdle   = 2;
-            config.maxIdle   = 5;
-            config.testOnBorrow = false;
-            config.testOnReturn = true;
-            config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
-            config.maxWait = -1;
-            sc_callback_pool = new ThreadImplPool(config);
+            ThreadPoolCreator tp_creator = new ThreadPoolCreator() {
+
+                public ThreadObjectFactory getThreadObjectFactory() {
+                    return new ThreadObjectFactory() {
+                        @Override
+                        public void initialiseThread(Thread thread)
+                        {
+                            thread.setName("StatusChange");
+                        }
+
+                        @Override
+                        public void activateThread(Thread thread)
+                        {
+                        }
+
+                        @Override
+                        public void passivateThread(Thread thread)
+                        {
+                        }
+                    };
+                }
+
+                public Config getThreadPoolConfig() {
+                    Config config = new Config();
+                    config.maxActive = 10;
+                    config.minIdle   = 2;
+                    config.maxIdle   = 5;
+                    config.testOnBorrow = false;
+                    config.testOnReturn = true;
+                    config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
+                    config.maxWait = -1;
+                    return config;
+                }
+
+                public String getThreadPoolName() {
+                    return "StatusChangePool";
+                }
+            };
+            sc_callback_pool = new ThreadPool(tp_creator.getThreadObjectFactory(), tp_creator.getThreadPoolConfig());
         }
 
         private void registerStatusChangeCallback(StatusChangeCallback event_callback)
@@ -585,13 +647,13 @@ public class CGateSession extends CGateObject
                     {
                         try
                         {
-                            ThreadImpl callback_thread = (ThreadImpl)sc_callback_pool.borrowObject();
+                            WorkerThread callback_thread = (WorkerThread)sc_callback_pool.borrowObject();
                             callback_thread.execute(new Runnable() {
                                 public void run()
                                 {
                                     sc_callback.processStatusChange(CGateSession.this, status_change);
                                 }
-                            });
+                            }, null);
                         }
                         catch (Exception e)
                         {

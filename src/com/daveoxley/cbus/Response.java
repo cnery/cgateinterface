@@ -19,8 +19,10 @@
 
 package com.daveoxley.cbus;
 
-import com.daveoxley.cbus.threadpool.ThreadImpl;
-import com.daveoxley.cbus.threadpool.ThreadImplPool;
+import com.workplacesystems.utilsj.threadpool.ThreadObjectFactory;
+import com.workplacesystems.utilsj.threadpool.ThreadPool;
+import com.workplacesystems.utilsj.threadpool.ThreadPoolCreator;
+import com.workplacesystems.utilsj.threadpool.WorkerThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,17 +41,47 @@ public class Response implements Iterable<String>
 {
     private final static Log log = LogFactory.getLog(Response.class);
 
-    private final static ThreadImplPool response_pool;
+    private final static ThreadPool response_pool;
 
     static
     {
-        Config config = new Config();
-        config.minIdle   = 2;
-        config.maxIdle   = 5;
-        config.testOnBorrow = false;
-        config.testOnReturn = true;
-        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_GROW;
-        response_pool = new ThreadImplPool(config);
+        ThreadPoolCreator tp_creator = new ThreadPoolCreator() {
+
+            public ThreadObjectFactory getThreadObjectFactory() {
+                return new ThreadObjectFactory() {
+                    @Override
+                    public void initialiseThread(Thread thread)
+                    {
+                        thread.setName("Response");
+                    }
+
+                    @Override
+                    public void activateThread(Thread thread)
+                    {
+                    }
+
+                    @Override
+                    public void passivateThread(Thread thread)
+                    {
+                    }
+                };
+            }
+
+            public Config getThreadPoolConfig() {
+                Config config = new Config();
+                config.minIdle   = 2;
+                config.maxIdle   = 5;
+                config.testOnBorrow = false;
+                config.testOnReturn = true;
+                config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_GROW;
+                return config;
+            }
+
+            public String getThreadPoolName() {
+                return "ResponsePool";
+            }
+        };
+        response_pool = new ThreadPool(tp_creator.getThreadObjectFactory(), tp_creator.getThreadPoolConfig());
     }
 
     private final Object response_mutex = new Object();
@@ -58,7 +90,7 @@ public class Response implements Iterable<String>
 
     private BufferedReader response_reader;
 
-    private ThreadImpl response_thread;
+    private WorkerThread response_thread;
 
     private ArrayList<String> array_response;
 
@@ -69,7 +101,7 @@ public class Response implements Iterable<String>
         try
         {
             this.response_reader = response_reader;
-            this.response_thread = (ThreadImpl) response_pool.borrowObject();
+            this.response_thread = (WorkerThread) response_pool.borrowObject();
             this.response_thread.execute(new Runnable() {
                 public void run()
                 {
@@ -118,7 +150,7 @@ public class Response implements Iterable<String>
                         }
                     }
                 }
-            });
+            }, null);
         }
         catch (Exception e)
         {
