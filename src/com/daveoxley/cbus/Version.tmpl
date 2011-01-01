@@ -1,0 +1,62 @@
+/**
+ *  CGateInterface - A library to allow interaction with Clipsal C-Gate.
+ *  Copyright (C) 2008,2009  Dave Oxley <dave@daveoxley.co.uk>.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+package com.daveoxley.cbus;
+
+/**
+ *
+ * @author dave
+ */
+public final class Version {
+
+    public final static String getVersion() {
+        return "0.4.0";
+    }
+
+    public final static String getRevision() {
+        return "@@REV@@";
+    }
+
+    public final static String getURL() {
+        return "@@URL@@";
+    }
+
+    public final static String getBranch() {
+        return getURL().substring(getURL().lastIndexOf("/") + 1);
+    }
+
+    public final static String getVersionDesc() {
+        if (getBranch().equals("trunk") || getURL().indexOf("/branches/") >= 0)
+            return getVersion() + "-dev";
+        return getVersion();
+    }
+
+    public final static String getBranchDesc() {
+        if (getURL().indexOf("/tags/") >= 0)
+            return "Tag " + getBranch();
+        return "Branch " + getBranch();
+    }
+
+    public final static String getVersionMini() {
+        String ver = getVersion();
+        if (getBranch().equals("trunk") || getURL().indexOf("/branches/") >= 0)
+            ver += ".d";
+        return ver + "." + getRevision();
+    }
+}
