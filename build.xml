@@ -95,11 +95,11 @@
     <target name="get-version">
         <taskdef classname="com.workplacesystems.utilsj.ant.GetVersionNumber" name="getversionnumber">
             <classpath>
-                <pathelement location="lib/utilsj/dist/utilsj-1.0.0.jar"/>
+                <pathelement location="lib/utilsj/dist/utilsj-1.1.1-dev.jar"/>
                 <pathelement location="${build.classes.dir}"/>
             </classpath>
         </taskdef>
-        <getversionnumber propertyName="cgi.version" propertyDescName="cgi.version.desc" versionClass="com.daveoxley.cbus.Version"/>
+        <getversionnumber propertyName="cgi.version" propertyDescName="cgi.version.desc" propertyMvnName="cgi.version.mvn" versionClass="com.daveoxley.cbus.Version"/>
     </target>
 
     <target depends="get-version" name="-post-compile">
