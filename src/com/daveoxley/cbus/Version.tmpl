@@ -29,34 +29,43 @@ public final class Version {
         return "0.4.0";
     }
 
-    public final static String getRevision() {
-        return "@@REV@@";
-    }
-
-    public final static String getURL() {
-        return "@@URL@@";
+    public final static String getCommit() {
+        return "@@COMMIT@@";
     }
 
     public final static String getBranch() {
-        return getURL().substring(getURL().lastIndexOf("/") + 1);
+        return "@@BRANCH@@";
+    }
+
+    public final static boolean isDirty() {
+        return @@DIRTY@@;
     }
 
     public final static String getVersionDesc() {
-        if (getBranch().equals("trunk") || getURL().indexOf("/branches/") >= 0)
+        if (!getBranch().trim().equals(""))
             return getVersion() + "-dev";
         return getVersion();
     }
 
+    public final static String getVersionMvn() {
+        if (!getBranch().trim().equals(""))
+            return getVersion() + "-SNAPSHOT";
+        return getVersion();
+    }
+
     public final static String getBranchDesc() {
-        if (getURL().indexOf("/tags/") >= 0)
+        if (getBranch().trim().equals(""))
             return "Tag " + getBranch();
         return "Branch " + getBranch();
     }
 
     public final static String getVersionMini() {
         String ver = getVersion();
-        if (getBranch().equals("trunk") || getURL().indexOf("/branches/") >= 0)
+        if (!getBranch().trim().equals(""))
             ver += ".d";
-        return ver + "." + getRevision();
+        ver += "-" + getCommit();
+        if (isDirty())
+            ver += "M";
+        return ver;
     }
 }

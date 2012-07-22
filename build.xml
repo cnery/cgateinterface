@@ -78,21 +78,18 @@
                 <isset property="generate.version.java"/>
             </and>
         </condition>
-        <property name="svn.config.dir" value="~/.subversion"/>
     </target>
 
     <target name="-pre-compile" if="do.generate.version.java">
-        <exec outputproperty="build.current.revision" executable="svnversion">
-             <arg line="-n" />
+        <exec executable="/bin/bash">
+            <arg value="git-status.sh"/>
         </exec>
-        <exec output="svninfo.xml" executable="svn">
-          <arg line="info --xml --config-dir ${svn.config.dir}" />
-        </exec>
-        <xmlproperty file="svninfo.xml" collapseattributes="true"/>
-        <delete file="svninfo.xml"/>
+        <property file="git-status.properties"/>
+        <delete file="git-status.properties"/>
         <copy file="${src.dir}/com/daveoxley/cbus/Version.tmpl" tofile="${src.dir}/com/daveoxley/cbus/Version.java" overwrite="true"/>
-        <replace file="${src.dir}/com/daveoxley/cbus/Version.java" token="@@REV@@" value="${build.current.revision}"/>
-        <replace file="${src.dir}/com/daveoxley/cbus/Version.java" token="@@URL@@" value="${info.entry.url}"/>
+        <replace file="${src.dir}/com/daveoxley/cbus/Version.java" token="@@COMMIT@@" value="${git.commit}"/>
+        <replace file="${src.dir}/com/daveoxley/cbus/Version.java" token="@@BRANCH@@" value="${git.branch}"/>
+        <replace file="${src.dir}/com/daveoxley/cbus/Version.java" token="@@DIRTY@@" value="${git.dirty}"/>
     </target>
 
     <target name="get-version">
@@ -113,7 +110,7 @@
         <tar tarfile="${dist.jar.dir}/cgateinterface.tar" longfile="gnu">
           <tarfileset dir="." prefix="cgateinterface-${cgi.version.desc}">
             <include name="**/*"/>
-            <exclude name="**/.svn"/>
+            <exclude name="**/.git"/>
             <exclude name="custom.properties"/>
             <exclude name="**/build/**"/>
             <exclude name="dist/cgateinterface-*.tar.gz"/>
