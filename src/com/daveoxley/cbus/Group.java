@@ -29,28 +29,25 @@ public class Group extends CGateObject implements Comparable<Group>
 {
     private Application application;
 
-    private int group_id;
+    private int groupIndex;
+
+    private int groupId;
 
     private boolean on_network;
 
-    Group(CGateSession cgate_session, Application application, String cgate_response, boolean tree_resp)
+    Group(CGateSession cgate_session, Application application, int groupIndex, int groupId)
     {
         super(cgate_session);
         this.application = application;
-        this.on_network = tree_resp;
-        if (tree_resp)
-            this.group_id = getGroupID(application.getNetwork(), cgate_response);
-        else
-        {
-            int index = cgate_response.indexOf("=");
-            this.group_id = Integer.parseInt(cgate_response.substring(index + 1));
-        }
+        this.groupIndex = groupIndex;
+        this.groupId = groupId;
+        this.on_network = groupIndex != -1;
     }
 
     @Override
     protected String getKey()
     {
-        return String.valueOf(group_id);
+        return String.valueOf(groupId);
     }
 
     @Override
@@ -60,10 +57,17 @@ public class Group extends CGateObject implements Comparable<Group>
     }
 
     @Override
-    public String getAddress()
+    String getProjectAddress()
     {
-        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() +
-                "/" + application.getApplicationID() + "/" + getGroupID();
+        return "//" + getNetwork().getProjectName();
+    }
+
+    @Override
+    String getResponseAddress(boolean id)
+    {
+        return getNetwork().getNetworkID() + "/" + 
+                application.getApplicationID() +
+                "/" + (id ? getGroupID() : ("Group[" + groupIndex + "]"));
     }
 
     @Override
@@ -74,40 +78,38 @@ public class Group extends CGateObject implements Comparable<Group>
 	return (getGroupID()<o.getGroupID() ? -1 : (getGroupID()==o.getGroupID() ? 0 : 1));
     }
 
-    static Group getOrCreateGroup(CGateSession cgate_session, Network network, String response) throws CGateException
+    static void createDBGroup(CGateSession cgate_session, Network network, String response) throws CGateException
     {
         String application_type = Network.getApplicationType(network, response);
-        int group_id = getGroupID(network, response);
-
+        int groupId = getGroupID(network, response);
+        
         if (!application_type.equals("p"))
         {
             Application application = network.getApplication(Integer.parseInt(application_type));
             if (application != null)
             {
-                Group group = (Group)application.getCachedObject("group", String.valueOf(group_id));
+                Group group = (Group)application.getCachedObject("group", String.valueOf(groupId));
                 if (group == null)
                 {
-                    group = new Group(cgate_session, application, response, true);
+                    group = new Group(cgate_session, application, -1, groupId);
                     application.cacheObject("group", group);
                 }
-                return group;
             }
         }
-        return null;
     }
 
-    static Group getOrCreateGroup(CGateSession cgate_session, Application application, String response) throws CGateException
+    static Group getOrCreateGroup(CGateSession cgate_session, Application application, int groupIndex, String response) throws CGateException
     {
         int index = response.indexOf("=");
-        String group_id = response.substring(index + 1);
+        String groupId = response.substring(index + 1);
 
-        if (group_id.equals("255"))
+        if (groupId.equals("255"))
             return null;
 
-        Group group = (Group)application.getCachedObject("group", group_id);
+        Group group = (Group)application.getCachedObject("group", groupId);
         if (group == null)
         {
-            group = new Group(cgate_session, application, response, false);
+            group = new Group(cgate_session, application, groupIndex, Integer.parseInt(groupId));
             application.cacheObject("group", group);
         }
         return group;
@@ -116,7 +118,7 @@ public class Group extends CGateObject implements Comparable<Group>
     static int getGroupID(Network network, String response)
     {
         String application_type = Network.getApplicationType(network, response);
-        String application_address = network.getAddress() + "/" + application_type + "/";
+        String application_address = network.getResponseAddress(true) + "/" + application_type + "/";
         int index = response.indexOf(application_address);
         int unit_index = response.indexOf(" ", index + 1);
         return Integer.parseInt(response.substring(index + application_address.length(), unit_index).trim());
@@ -128,7 +130,7 @@ public class Group extends CGateObject implements Comparable<Group>
      */
     public int getGroupID()
     {
-        return group_id;
+        return groupId;
     }
 
     /**
@@ -151,8 +153,10 @@ public class Group extends CGateObject implements Comparable<Group>
 
     public String getName() throws CGateException
     {
-        String address = getAddress() + "/TagName";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        if (!on_network)
+            return "";
+        String address = getResponseAddress(false) + "/TagName";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
@@ -165,7 +169,7 @@ public class Group extends CGateObject implements Comparable<Group>
      */
     public Response on() throws CGateException
     {
-        return getCGateSession().sendCommand("on " + getAddress());
+        return getCGateSession().sendCommand("on " + getProjectAddress() + "/" + getResponseAddress(true));
     }
 
     /**
@@ -177,7 +181,7 @@ public class Group extends CGateObject implements Comparable<Group>
      */
     public Response off() throws CGateException
     {
-        return getCGateSession().sendCommand("off " + getAddress());
+        return getCGateSession().sendCommand("off " + getProjectAddress() + "/" + getResponseAddress(true));
     }
 
     /**
@@ -191,7 +195,7 @@ public class Group extends CGateObject implements Comparable<Group>
      */
     public Response ramp(int level, int seconds) throws CGateException
     {
-        return getCGateSession().sendCommand("ramp " + getAddress() + " " + level + " " + seconds + "s");
+        return getCGateSession().sendCommand("ramp " + getProjectAddress() + "/" + getResponseAddress(true) + " " + level + " " + seconds + "s");
     }
 
     /**
@@ -204,7 +208,7 @@ public class Group extends CGateObject implements Comparable<Group>
      */
     public Response terminateRamp(boolean force) throws CGateException
     {
-        return getCGateSession().sendCommand("terminate_ramp " + getAddress() + (force ? " force" : ""));
+        return getCGateSession().sendCommand("terminate_ramp " + getProjectAddress() + "/" + getResponseAddress(true) + (force ? " force" : ""));
     }
 
     /**
@@ -216,7 +220,7 @@ public class Group extends CGateObject implements Comparable<Group>
      */
     public int getLevel() throws CGateException
     {
-        ArrayList<String> resp_array = getCGateSession().sendCommand("get " + getAddress() + " Level").toArray();
+        ArrayList<String> resp_array = getCGateSession().sendCommand("get " + getProjectAddress() + "/" + getResponseAddress(true) + " Level").toArray();
         String level_str = responseToMap(resp_array.get(0)).get("Level");
         return level_str == null ? 0 : Integer.valueOf(level_str);
     }

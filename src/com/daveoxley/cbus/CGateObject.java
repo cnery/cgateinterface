@@ -83,7 +83,15 @@ public abstract class CGateObject
 
     public abstract CGateObject getCGateObject(String address) throws CGateException;
 
-    public abstract String getAddress();
+    abstract String getProjectAddress();
+
+    abstract String getResponseAddress(boolean id);
+
+    public final String getAddress()
+    {
+        String respAddress = getResponseAddress(true);
+        return getProjectAddress() + ((respAddress != null && !respAddress.equals("")) ? "/" + respAddress : "");
+    }
 
     protected void setupSubtreeCache(String cache_key)
     {

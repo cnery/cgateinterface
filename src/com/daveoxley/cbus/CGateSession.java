@@ -117,7 +117,13 @@ public class CGateSession extends CGateObject
     }
 
     @Override
-    public String getAddress()
+    String getProjectAddress()
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    String getResponseAddress(boolean id)
     {
         throw new UnsupportedOperationException();
     }

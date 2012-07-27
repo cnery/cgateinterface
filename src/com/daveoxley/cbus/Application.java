@@ -32,20 +32,23 @@ public class Application extends CGateObject implements Comparable<Application>
 {
     private Network network;
 
-    private int application_id;
+    private int applicationIndex;
 
-    private Application(CGateSession cgate_session, Network network, int application_id)
+    private int applicationId;
+
+    private Application(CGateSession cgate_session, Network network, int applicationIndex, int applicationId)
     {
         super(cgate_session);
         this.network = network;
-        this.application_id = application_id;
+        this.applicationIndex = applicationIndex;
+        this.applicationId = applicationId;
         setupSubtreeCache("group");
     }
 
     @Override
     protected String getKey()
     {
-        return String.valueOf(application_id);
+        return String.valueOf(applicationId);
     }
 
     @Override
@@ -74,9 +77,15 @@ public class Application extends CGateObject implements Comparable<Application>
     }
 
     @Override
-    public String getAddress()
+    String getProjectAddress()
     {
-        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/" + getApplicationID();
+        return "//" + getNetwork().getProjectName();
+    }
+
+    @Override
+    String getResponseAddress(boolean id)
+    {
+        return getNetwork().getNetworkID() + "/" + (id ? getApplicationID() : ("Application[" + applicationIndex + "]"));
     }
 
     @Override
@@ -87,18 +96,18 @@ public class Application extends CGateObject implements Comparable<Application>
 	return (getApplicationID()<o.getApplicationID() ? -1 : (getApplicationID()==o.getApplicationID() ? 0 : 1));
     }
 
-    static Application getOrCreateApplication(CGateSession cgate_session, Network network, String response)
+    static Application getOrCreateApplication(CGateSession cgate_session, Network network, int applicationIndex, String response)
     {
         int index = response.indexOf("=");
-        String application_id = response.substring(index + 1);
+        String applicationId = response.substring(index + 1);
 
-        if (application_id.equals("255"))
+        if (applicationId.equals("255"))
             return null;
 
-        Application application = (Application)network.getCachedObject("application", application_id);
+        Application application = (Application)network.getCachedObject("application", applicationId);
         if (application == null)
         {
-            application = new Application(cgate_session, network, Integer.parseInt(application_id));
+            application = new Application(cgate_session, network, applicationIndex, Integer.parseInt(applicationId));
             network.cacheObject("application", application);
         }
         return application;
@@ -111,31 +120,31 @@ public class Application extends CGateObject implements Comparable<Application>
 
     public int getApplicationID()
     {
-        return application_id;
+        return applicationId;
     }
 
     public String getHexID()
     {
-        return Integer.toHexString(application_id);
+        return Integer.toHexString(applicationId);
     }
 
     public String getName() throws CGateException
     {
-        String address = getAddress() + "/TagName";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/TagName";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getDescription() throws CGateException
     {
-        String address = getAddress() + "/Description";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/Description";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     Response dbget(String param_name) throws CGateException
     {
-        return getCGateSession().sendCommand("dbget " + getAddress() + (param_name == null ? "" : ("/" + param_name)));
+        return getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + getResponseAddress(true) + (param_name == null ? "" : ("/" + param_name)));
     }
 
     public ArrayList<Group> getGroups(boolean cached_objects) throws CGateException
@@ -158,13 +167,11 @@ public class Application extends CGateObject implements Comparable<Application>
             return groups;
         }
 
-        network.tree();
-
         Response resp = dbget(null);
 
         int number_of_groups = -1;
         for (String response : resp) {
-            String address = getAddress() + "/Group[";
+            String address = getResponseAddress(true) + "/Group[";
             int index = response.indexOf(address);
             if (index > -1) {
                 int index2 = response.indexOf("]", index + address.length());
@@ -175,10 +182,12 @@ public class Application extends CGateObject implements Comparable<Application>
 
         for (int i = 1; i <= number_of_groups; i++) {
             ArrayList<String> resp_array = dbget("Group[" + i + "]/Address").toArray();
-            Group group = Group.getOrCreateGroup(getCGateSession(), this, resp_array.get(0));
+            Group group = Group.getOrCreateGroup(getCGateSession(), this, i, resp_array.get(0));
             if (group != null)
                 groups.add(group);
         }
+
+        network.tree();
 
         return groups;
     }

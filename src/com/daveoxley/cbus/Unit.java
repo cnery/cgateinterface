@@ -29,28 +29,25 @@ public class Unit extends CGateObject implements Comparable<Unit>
 {
     private Network network;
 
-    private int unit_id;
+    private int unitIndex;
+
+    private int unitId;
 
     private boolean on_network;
 
-    Unit(CGateSession cgate_session, Network network, String cgate_response, boolean tree_resp)
+    Unit(CGateSession cgate_session, Network network, int unitIndex, int unitId)
     {
         super(cgate_session);
         this.network = network;
-        this.on_network = tree_resp;
-        if (tree_resp)
-            this.unit_id = getUnitID(network, cgate_response);
-        else
-        {
-            int index = cgate_response.indexOf("=");
-            this.unit_id = Integer.parseInt(cgate_response.substring(index + 1));
-        }
+        this.unitIndex = unitIndex;
+        this.unitId = unitId;
+        this.on_network = unitIndex != -1;
     }
 
     @Override
     protected String getKey()
     {
-        return String.valueOf(unit_id);
+        return String.valueOf(unitId);
     }
 
     @Override
@@ -60,9 +57,16 @@ public class Unit extends CGateObject implements Comparable<Unit>
     }
 
     @Override
-    public String getAddress()
+    String getProjectAddress()
     {
-        return "//" + getNetwork().getProjectName() + "/" + getNetwork().getNetworkID() + "/p/" + getUnitID();
+        return "//" + getNetwork().getProjectName();
+    }
+
+    @Override
+    String getResponseAddress(boolean id)
+    {
+        return getNetwork().getNetworkID() +
+                "/" + (id ? ("p/" + getUnitID()) : ("Unit[" + unitIndex + "]"));
     }
 
     @Override
@@ -73,38 +77,34 @@ public class Unit extends CGateObject implements Comparable<Unit>
 	return (getUnitID()<o.getUnitID() ? -1 : (getUnitID()==o.getUnitID() ? 0 : 1));
     }
 
-    static Unit getOrCreateUnit(CGateSession cgate_session, Network network, String response, boolean tree_resp) throws CGateException
+    static void createDBUnit(CGateSession cgate_session, Network network, String response) throws CGateException
     {
-        if (tree_resp)
-        {
-            String application_type = Network.getApplicationType(network, response);
-            int unit_id = getUnitID(network, response);
+        String application_type = Network.getApplicationType(network, response);
+        int unitId = getUnitID(network, response);
 
-            if (application_type.equals("p"))
-            {
-                Unit unit = (Unit)network.getCachedObject("unit", String.valueOf(unit_id));
-                if (unit == null)
-                {
-                    unit = new Unit(cgate_session, network, response, true);
-                    network.cacheObject("unit", unit);
-                }
-                return unit;
-            }
-            return null;
-        }
-        else
+        if (application_type.equals("p"))
         {
-            int index = response.indexOf("=");
-            String unit_id = response.substring(index + 1);
-
-            Unit unit = (Unit)network.getCachedObject("unit", unit_id);
+            Unit unit = (Unit)network.getCachedObject("unit", String.valueOf(unitId));
             if (unit == null)
             {
-                unit = new Unit(cgate_session, network, response, false);
+                unit = new Unit(cgate_session, network, -1, unitId);
                 network.cacheObject("unit", unit);
             }
-            return unit;
         }
+    }
+
+    static Unit getOrCreateUnit(CGateSession cgate_session, Network network, int unitIndex, String response) throws CGateException
+    {
+        int index = response.indexOf("=");
+        String unitId = response.substring(index + 1);
+
+        Unit unit = (Unit)network.getCachedObject("unit", unitId);
+        if (unit == null)
+        {
+            unit = new Unit(cgate_session, network, unitIndex, Integer.parseInt(unitId));
+            network.cacheObject("unit", unit);
+        }
+        return unit;
     }
 
     static int getUnitID(Network network, String response)
@@ -122,7 +122,7 @@ public class Unit extends CGateObject implements Comparable<Unit>
      */
     public int getUnitID()
     {
-        return unit_id;
+        return unitId;
     }
 
     /**
@@ -146,36 +146,36 @@ public class Unit extends CGateObject implements Comparable<Unit>
 
     public String getName() throws CGateException
     {
-        String address = getAddress() + "/TagName";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/TagName";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getUnitType() throws CGateException
     {
-        String address = getAddress() + "/UnitType";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/UnitType";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getSerialNumber() throws CGateException
     {
-        String address = getAddress() + "/SerialNumber";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/SerialNumber";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getUnitName() throws CGateException
     {
-        String address = getAddress() + "/UnitName";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/UnitName";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 
     public String getFirmware() throws CGateException
     {
-        String address = getAddress() + "/FirmwareVersion";
-        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + address).toArray();
+        String address = getResponseAddress(true) + "/FirmwareVersion";
+        ArrayList<String> resp_array = getCGateSession().sendCommand("dbget " + getProjectAddress() + "/" + address).toArray();
         return responseToMap(resp_array.get(0), true).get(address);
     }
 }

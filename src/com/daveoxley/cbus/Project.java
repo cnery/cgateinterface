@@ -75,9 +75,15 @@ public final class Project extends CGateObject implements Comparable<Project>
     }
 
     @Override
-    public String getAddress()
+    String getProjectAddress()
     {
         return "//" + getName();
+    }
+
+    @Override
+    String getResponseAddress(boolean id)
+    {
+        return "";
     }
 
     @Override
