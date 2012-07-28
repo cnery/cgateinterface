@@ -1,7 +1,11 @@
-CGateInterface 1.0.0 (released TBD)
-Compatibility changes for C-Gate 2.9.0.
-Move hosting to github.
-Swtich thread pool implementation UtilsJ.
+CGateInterface 1.1.0 (released TBD)
+
+
+CGateInterface 1.0.0 (released 28/7/12)
+
+* Compatibility changes for C-Gate 2.9.0.
+* Move hosting to github.
+* Swtich thread pool implementation UtilsJ.
 
 CGateInterface 0.3.0 (released 4/2/09)
 
