@@ -45,7 +45,8 @@ public class CGateSessionTest {
 
         CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
                 CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
-        session.getCGateObject("//OXLEY/254/56/0");
+        session.connect();
+        session.getCGateObject("//HOME/254/56/1");
         session.close();
     }
 }

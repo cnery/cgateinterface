@@ -49,6 +49,7 @@ public class UnitTest {
     public void setUp() throws CGateConnectException {
         session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
                 CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
+        session.connect();
     }
 
     @After
@@ -63,10 +64,10 @@ public class UnitTest {
     public void testGetApplicationType() throws CGateException {
         System.out.println("getApplicationType");
 
-        String example_tree_resp1 = "320-//OXLEY/254/p/14 ($e) type=KEYBL5 app=56($38),136($88) state=ok groups=1,44,10,2";
-        String example_tree_resp2 = "320- //OXLEY/254/56/10 ($a) level=0 state=ok units=6,14";
+        String example_tree_resp1 = "320-//HOME/254/p/14 ($e) type=KEY2 app=56($38),255($ff) state=ok groups=22,23";
+        String example_tree_resp2 = "320-  //HOME/254/56/10 ($a) level=0 state=sync units=1,29,31";
 
-        Project project = Project.getProject(session, "OXLEY");
+        Project project = Project.getProject(session, "HOME");
         Network network = project.getNetwork(254);
 
         assertEquals("p", Network.getApplicationType(network, example_tree_resp1));
@@ -80,10 +81,10 @@ public class UnitTest {
     public void testGetUnitID() throws CGateException {
         System.out.println("getUnitID");
 
-        String example_tree_resp1 = "320-//OXLEY/254/p/14 ($e) type=KEYBL5 app=56($38),136($88) state=ok groups=1,44,10,2";
-        String example_tree_resp2 = "320- //OXLEY/254/56/10 ($a) level=0 state=ok units=6,14";
+        String example_tree_resp1 = "320-//HOME/254/p/14 ($e) type=KEY2 app=56($38),255($ff) state=ok groups=22,23";
+        String example_tree_resp2 = "320-  //HOME/254/56/10 ($a) level=0 state=sync units=1,29,31";
 
-        Project project = Project.getProject(session, "OXLEY");
+        Project project = Project.getProject(session, "HOME");
         Network network = project.getNetwork(254);
 
         assertEquals(14, Unit.getUnitID(network, example_tree_resp1));

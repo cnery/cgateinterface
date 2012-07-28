@@ -50,6 +50,7 @@ public class NetworkTest {
     public void setUp() throws CGateConnectException {
         session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
                 CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
+        session.connect();
     }
 
     @After
@@ -87,7 +88,7 @@ public class NetworkTest {
     public void testListApplications() throws CGateException {
         System.out.println("listApplications");
 
-        Network network = Project.getProject(session, "OXLEY").getNetwork(254);
+        Network network = Project.getProject(session, "HOME").getNetwork(254);
         network.getApplications(false);
     }
 }

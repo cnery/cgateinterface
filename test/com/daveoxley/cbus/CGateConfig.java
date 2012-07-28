@@ -29,7 +29,7 @@ import java.net.UnknownHostException;
 class CGateConfig
 {
     /** Configure these for specific environment */
-    static final String SERVER_STR = "blackadder";
+    static final String SERVER_STR = "localhost";
     static final int COMMAND_PORT = 20023;
     static final int EVENT_PORT = 20024;
     static final int STATUS_CHANGE_PORT = 20025;

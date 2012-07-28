@@ -68,6 +68,7 @@ public class CGateInterfaceTest {
         CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
                 CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
         assertNotNull(session);
+        session.connect();
         session.close();
     }
 
@@ -87,6 +88,7 @@ public class CGateInterfaceTest {
 
         CGateSession session = CGateInterface.connect(CGateConfig.SERVER, CGateConfig.COMMAND_PORT,
                 CGateConfig.EVENT_PORT, CGateConfig.STATUS_CHANGE_PORT);
+        session.connect();
         CGateInterface.noop(session);
         session.close();
     }

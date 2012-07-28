@@ -70,6 +70,9 @@ public class CGateSession extends CGateObject
     CGateSession(InetAddress cgate_server, int command_port, int event_port, int status_change_port)
     {
         super(null);
+        if (cgate_server == null)
+            throw new NullPointerException("cgate_server cannot be null");
+
         setupSubtreeCache("project");
         command_connection = new CommandConnection(cgate_server, command_port);
         event_connection = new EventConnection(cgate_server, event_port);
