@@ -32,16 +32,6 @@ public final class CGateInterface extends CGateObject
         super(null);
     }
 
-    /**
-     * Retrieve the CGateInterface library version.
-     *
-     * @return The CGateInterface version
-     */
-    public static String getVersion()
-    {
-        return "0.4.0-dev";
-    }
-
     @Override
     protected String getKey()
     {
