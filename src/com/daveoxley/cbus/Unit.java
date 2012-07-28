@@ -1,6 +1,6 @@
 /**
  *  CGateInterface - A library to allow interaction with Clipsal C-Gate.
- *  Copyright (C) 2008,2009  Dave Oxley <dave@daveoxley.co.uk>.
+ *  Copyright (C) 2008,2009,2012  Dave Oxley <dave@daveoxley.co.uk>.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
