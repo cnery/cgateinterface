@@ -221,6 +221,7 @@ public class CGateSession extends CGateObject
         {
             command_connection.start();
             event_connection.start();
+            status_change_connection.start();
         }
         catch (CGateConnectException e)
         {
@@ -331,20 +332,17 @@ public class CGateSession extends CGateObject
             {
                 while (continueRunning())
                 {
-                    try
-                    {
-                        doRun();
-                    }
-                    catch (IOException ioe)
-                    {
-                        if (thread != null)
-                            new CGateException(ioe);
-                    }
-                    catch (Exception e)
-                    {
-                        new CGateException(e);
-                    }
+                    doRun();
                 }
+            }
+            catch (IOException ioe)
+            {
+                if (thread != null)
+                    new CGateException(ioe);
+            }
+            catch (Exception e)
+            {
+                new CGateException(e);
             }
             finally
             {

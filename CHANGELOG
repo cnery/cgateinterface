@@ -1,6 +1,6 @@
-CGateInterface 1.0.1 (released TBD)
+CGateInterface 1.0.1 (released 29/4/13)
 
-
+* Fix reconnection to C-Gate after dropped connection.
 
 CGateInterface 1.0.0 (released 28/7/12)
 
