@@ -1,5 +1,11 @@
 CGateInterface 1.1.0 (released TBD)
 
+
+CGateInterface 1.0.2 (released 1/5/13)
+
+* Futher C-Gate reconnection fixes.
+* Add option to disable keep alive ping.
+
 CGateInterface 1.0.1 (released 29/4/13)
 
 * Fix reconnection to C-Gate after dropped connection.

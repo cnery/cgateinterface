@@ -65,6 +65,8 @@ public class CGateSession extends CGateObject
 
     private final PingConnections ping_connections;
 
+    private boolean pingKeepAlive = true;
+
     private boolean connected = false;
 
     CGateSession(InetAddress cgate_server, int command_port, int event_port, int status_change_port)
@@ -142,7 +144,8 @@ public class CGateSession extends CGateObject
             event_connection.start();
             status_change_connection.start();
             connected = true;
-            ping_connections.start();
+            if (pingKeepAlive)
+                ping_connections.start();
         }
         catch (CGateConnectException e)
         {
@@ -153,6 +156,11 @@ public class CGateSession extends CGateObject
             catch (Exception e2) {}
             throw e;
         }
+    }
+
+    public void enableKeepAlivePing(boolean pingKeepAlive)
+    {
+        this.pingKeepAlive = pingKeepAlive;
     }
 
     /**
@@ -307,7 +315,7 @@ public class CGateSession extends CGateObject
 
         public void println(String str) throws CGateException
         {
-            if (!create_output)
+            if (!create_output || output_stream == null)
                 throw new CGateException();
 
             output_stream.println(str);
@@ -379,20 +387,27 @@ public class CGateSession extends CGateObject
 
         public synchronized void run()
         {
-            while (connected)
+            try
             {
-                try
+                while (connected && pingKeepAlive)
                 {
                     try
                     {
-                        wait(10000l);
-                    }
-                    catch (InterruptedException e) {}
+                        try
+                        {
+                            wait(10000l);
+                        }
+                        catch (InterruptedException e) {}
 
-                    if (connected)
-                        CGateInterface.noop(CGateSession.this);
+                        if (connected && pingKeepAlive)
+                            CGateInterface.noop(CGateSession.this);
+                    }
+                    catch (Exception e) {}
                 }
-                catch (Exception e) {}
+            }
+            finally
+            {
+                thread = null;
             }
         }
     }
@@ -448,7 +463,9 @@ public class CGateSession extends CGateObject
         public void doRun() throws IOException
         {
             final String response = getInputReader().readLine();
-            if (response != null)
+            if (response == null)
+                super.stop();
+            else
             {
                 int id_end = response.indexOf("]");
                 String id = response.substring(1, id_end);
@@ -536,7 +553,9 @@ public class CGateSession extends CGateObject
         protected void doRun() throws IOException
         {
             final String event = getInputReader().readLine();
-            if(event != null && event.length() >= 19)
+            if (event == null)
+                super.stop();
+            else if (event.length() >= 19)
             {
                 final int event_code = Integer.parseInt(event.substring(16, 19).trim());
                 for (final EventCallback event_callback : event_callbacks)
@@ -643,7 +662,9 @@ public class CGateSession extends CGateObject
         protected void doRun() throws IOException
         {
             final String status_change = getInputReader().readLine();
-            if(status_change != null && status_change.length() > 0)
+            if (status_change == null)
+                super.stop();
+            else if (status_change.length() > 0)
             {
                 for (final StatusChangeCallback sc_callback : sc_callbacks)
                 {
