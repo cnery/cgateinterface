@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="cgateinterface_(1.0.x)" default="default" basedir=".">
+<project name="cgateinterface_(1.0.x)" default="default" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <description>Builds, tests, and runs the project cgateinterface (1.0.x).</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
@@ -121,4 +121,92 @@
         <gzip src="${dist.jar.dir}/cgateinterface.tar" zipfile="${dist.jar.dir}/cgateinterface-${cgi.version.desc}.tar.gz"/>
         <delete file="${dist.jar.dir}/cgateinterface.tar"/>
     </target>
+
+    <target depends="jar,javadoc" name="maven-init">
+        <path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks/maven-ant-tasks-2.1.3.jar" />
+        <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+                 uri="antlib:org.apache.maven.artifact.ant"
+                 classpathref="maven-ant-tasks.classpath" />
+
+        <condition property="do.maven-snapshot">
+            <and>
+                <contains string="${cgi.version.mvn}" substring="-SNAPSHOT"/>
+            </and>
+        </condition>
+        <condition property="do.maven-stage">
+            <not>
+                <contains string="${cgi.version.mvn}" substring="-SNAPSHOT"/>
+            </not>
+        </condition>
+        
+        <!-- define artifacts' name, which follows the convention of Maven -->
+        <property name="maven-jar" value="dist/mvn/cgateinterface-${cgi.version.mvn}.jar" />
+        <property name="maven-javadoc-jar" value="dist/mvn/cgateinterface-${cgi.version.mvn}-javadoc.jar" />
+        <property name="maven-sources-jar" value="dist/mvn/cgateinterface-${cgi.version.mvn}-sources.jar" />
+
+        <mkdir dir="dist/mvn"/>
+
+        <copy file="${dist.jar.dir}/cgateinterface-${cgi.version.desc}.jar" tofile="${maven-jar}"/>
+        <jar jarfile="${maven-javadoc-jar}">
+			<fileset dir="dist/javadoc"/>
+        </jar>
+		<jar jarfile="${maven-sources-jar}">
+			<fileset dir="${src.dir}"/>
+		</jar>
+        <copy file="pom.tmpl" tofile="pom.xml" overwrite="true"/>
+        <replace file="pom.xml" token="@@VERSION@@" value="${cgi.version.mvn}"/>
+    </target>
+
+    <target depends="maven-init" name="maven-snapshot" if="do.maven-snapshot">
+        <property name="maven-snapshots-repository-id" value="sonatype-nexus-snapshots" />
+        <property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots/" />
+
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="-Durl=${maven-snapshots-repository-url}" />
+			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+			<arg value="-DpomFile=pom.xml" />
+			<arg value="-Dfile=${maven-jar}" />
+		</artifact:mvn>
+    </target>
+    
+    <target depends="maven-init" name="maven-stage" if="do.maven-stage">
+        <property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
+        <property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+
+		<!-- sign and deploy the main artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="-Durl=${maven-staging-repository-url}" />
+			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-DpomFile=pom.xml" />
+			<arg value="-Dfile=${maven-jar}" />
+            <arg value="-Pgpg" />
+		</artifact:mvn>
+
+		<!-- sign and deploy the sources artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="-Durl=${maven-staging-repository-url}" />
+			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-DpomFile=pom.xml" />
+			<arg value="-Dfile=${maven-sources-jar}" />
+			<arg value="-Dclassifier=sources" />
+            <arg value="-Pgpg" />
+		</artifact:mvn>
+
+		<!-- sign and deploy the javadoc artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="-Durl=${maven-staging-repository-url}" />
+			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
+			<arg value="-DpomFile=pom.xml" />
+			<arg value="-Dfile=${maven-javadoc-jar}" />
+			<arg value="-Dclassifier=javadoc" />
+            <arg value="-Pgpg" />
+		</artifact:mvn>
+    </target>
+
+    <target depends="jar,javadoc,maven-init,maven-snapshot,maven-stage" name="maven-deploy" description="Deploy build to maven central repository"/>
+
 </project>
