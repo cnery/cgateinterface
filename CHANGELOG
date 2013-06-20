@@ -1,6 +1,13 @@
 CGateInterface 1.1.0 (released TBD)
 
 
+CGateInterface 1.0.4 (released TBD)
+
+
+CGateInterface 1.0.3 (released 21/6/13)
+
+* Add maven deployment to build.
+
 CGateInterface 1.0.2 (released 1/5/13)
 
 * Futher C-Gate reconnection fixes.
