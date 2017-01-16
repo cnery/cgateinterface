@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "git.commit=`git rev-parse --short HEAD`" > git-status.properties
 branch=`git branch 2>/dev/null| sed -n '/^\*/s/^\* //p'`
-if [ "$branch" == "(no branch)" ]; then
+if [[ $branch == \(HEAD\ detached\ at\ * ]]; then
     echo "git.tag=`git describe --tags`" >> git-status.properties
     echo "git.branch=" >> git-status.properties
 else
